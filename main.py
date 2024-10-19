@@ -1,30 +1,87 @@
-# flet run main.py
-
 import flet as ft
 
 def main(page: ft.Page):
     page.title = "ERP Hortifruti"
-    
+    page.bgcolor = "#f2f2f2"  # Cor de fundo do app
+
+    def on_change_valor(e):
+        # Filtra para permitir apenas números
+        e.control.value = ''.join(filter(str.isdigit, e.control.value))
+        e.control.update()
+
     # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
         return ft.Column(
-            [
-                ft.Text(value="Caixa", size=50),
-                ft.ElevatedButton(text="Voltar", on_click=lambda e: trocar_tela(e)),
+            [                   
+                ft.Text(value="Caixa", size=50, color="black"),
+                ft.TextField(
+                    label="Valor de abertura",
+                    width=305,
+                    keyboard_type=ft.KeyboardType.NUMBER,
+                    on_change=on_change_valor
+                ),  # Campo para valor de abertura
+                ft.ElevatedButton(
+                    text="Abrir caixa",
+                    on_click=lambda e: trocar_tela(e),
+                    color="#62ff00",
+                    bgcolor="#000",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                ),
+                ft.ElevatedButton(
+                    text="Fechar caixa",
+                    on_click=lambda e: trocar_tela(e),
+                    color="#ff0000",
+                    bgcolor="#000",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                    ),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
-
+    
     def mostrar_tela_cadastro():
+        def on_change_preco(e):
+            try:
+                # Tenta converter o valor para float
+                float(e.control.value)
+                e.control.error_text = None  # Remove a mensagem de erro se for um valor válido
+            except ValueError:
+                e.control.error_text = "Insira um valor numérico válido."
+            e.control.update()
+
         return ft.Column(
             [
-                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD),
-                ft.TextField(label="Nome do Produto",width=300),
-                ft.TextField(label="Preço", keyboard_type=ft.KeyboardType.NUMBER),
-                ft.TextField(label="Categoria"),
-                ft.TextField(label="Quantidade em Estoque", keyboard_type=ft.KeyboardType.NUMBER),
-                ft.ElevatedButton("Adicionar Produto"),
+                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color="black"),
+                ft.TextField(label="Nome do Produto", width=300),
+                ft.TextField(label="Preço", width=300, keyboard_type=ft.KeyboardType.NUMBER, color="black", on_change=on_change_preco, hint_text="Digite o valor"),
+                ft.Row(
+                    [
+                        ft.Dropdown(
+                            label="Categoria",
+                            width=270,
+                            bgcolor="#f2f2f2",
+                            border_color="#000001",
+                            border_width=1,
+                            color="black",
+                            options=[
+                                ft.dropdown.Option("Frutas"),
+                                ft.dropdown.Option("Verduras"),
+                                ft.dropdown.Option("Legumes"),
+                                ft.dropdown.Option("Grãos"),
+                                ft.dropdown.Option("Laticínios"),
+                            ],
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                ft.TextField(label="Quantidade em Estoque", width=300, keyboard_type=ft.KeyboardType.NUMBER, color="black", on_change=on_change_valor, hint_text="Digite a quantidade"),
+                ft.ElevatedButton(
+                    "Adicionar Produto",
+                    color="#62ff00",
+                    bgcolor="#000",
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                ),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
@@ -33,9 +90,8 @@ def main(page: ft.Page):
     def mostrar_tela_vendas():
         return ft.Column(
             [
-                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD),
-                ft.Text("Aqui você poderá registrar as vendas e visualizar o histórico."),
-                # Adicione mais componentes relacionados às vendas
+                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color="black"),
+                ft.Text("Aqui você poderá registrar as vendas e visualizar o histórico.", color="black"),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
@@ -44,9 +100,8 @@ def main(page: ft.Page):
     def mostrar_tela_relatorios():
         return ft.Column(
             [
-                ft.Text("Relatórios", size=30, weight=ft.FontWeight.BOLD),
-                ft.Text("Aqui você poderá visualizar relatórios de vendas e estoque."),
-                # Adicione componentes para exibir gráficos e relatórios
+                ft.Text("Relatórios", size=30, weight=ft.FontWeight.BOLD, color="black"),
+                ft.Text("Aqui você poderá visualizar relatórios de vendas e estoque.", color="black"),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
@@ -71,6 +126,7 @@ def main(page: ft.Page):
         selected_index=0,
         label_type=ft.NavigationRailLabelType.ALL,
         min_width=100,
+        bgcolor=ft.colors.GREEN,
         min_extended_width=200,
         leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP, text="Sair", on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
@@ -91,12 +147,13 @@ def main(page: ft.Page):
                 label_content=ft.Text("Relatórios"),
             ),
             ft.NavigationRailDestination(
-                icon=ft.icons.APP_REGISTRATION,  # Substitua por um ícone adequado para "Caixa"
-                selected_icon_content=ft.Icon(ft.icons.APP_REGISTRATION),
+                icon=ft.icons.POINT_OF_SALE,
+                selected_icon_content=ft.Icon(ft.icons.POINT_OF_SALE),
                 label_content=ft.Text("Caixa"),
             ),
         ],
         on_change=trocar_tela,
+        
     )
 
     # Conteúdo inicial do corpo da página
@@ -114,4 +171,5 @@ def main(page: ft.Page):
         )
     )
 
+# Inicia a aplicação Flet
 ft.app(main)
