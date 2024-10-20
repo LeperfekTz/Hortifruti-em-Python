@@ -62,6 +62,7 @@ def main(page: ft.Page):
                 ])
             )
 
+
         # Atualiza a tabela com as novas linhas
         produtos_table.rows = data_rows
         page.update()
@@ -136,17 +137,19 @@ def main(page: ft.Page):
                         controls=[produtos_table],
                         width=650,  # Defina a largura desejada para a tabela
                         height=500,  # Defina a altura desejada para a tabela (opcional)
-                        padding=10,  
-                        
                     ),
-                    border_radius=20,
-                    bgcolor="#f2f2f2",
+                    padding=10,
+                    border=ft.Border(
+                        top=ft.BorderSide(color=ft.colors.GREEN, width=2),
+                        bottom=ft.BorderSide(color=ft.colors.GREEN, width=2),
+                        left=ft.BorderSide(color=ft.colors.GREEN, width=2),
+                        right=ft.BorderSide(color=ft.colors.GREEN, width=2)
+                    ),
+                    border_radius=10,  # Borda arredondada
+                    bgcolor="#f2f2f2",  # Cor de fundo do contêiner
                 ),
             ]
         )
-
-# Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
-
 
     # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
