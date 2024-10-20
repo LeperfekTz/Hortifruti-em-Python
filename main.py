@@ -43,7 +43,8 @@ def main(page: ft.Page):
                 hint_text="Qtd.",
                 width=80,
                 keyboard_type=ft.KeyboardType.NUMBER,
-                color="black",
+                color=ft.colors.BLACK,
+                border_color=ft.colors.BLACK,
             )
             venda_button = ft.ElevatedButton(
                 "Vender",
@@ -53,9 +54,9 @@ def main(page: ft.Page):
             # Adiciona uma linha de dados para a tabela
             data_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(produto[0])),  # Nome do produto
-                    ft.DataCell(ft.Text(f"R$ {produto[1]:.2f}")),  # Preço do produto
-                    ft.DataCell(ft.Text(produto[2])),  # Quantidade em estoque
+                    ft.DataCell(ft.Text(produto[0],color=ft.colors.BLACK)),  # Nome do produto
+                    ft.DataCell(ft.Text(f"R$ {produto[1]:.2f}",color=ft.colors.BLACK)),  # Preço do produto
+                    ft.DataCell(ft.Text(produto[2],color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
                     ft.DataCell(venda_button),  # Botão de venda
                 ])
@@ -109,14 +110,13 @@ def main(page: ft.Page):
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("Produto")),
-            ft.DataColumn(ft.Text("Preço")),
-            ft.DataColumn(ft.Text("Estoque")),
-            ft.DataColumn(ft.Text("Quantidade")),
-            ft.DataColumn(ft.Text("Ação")),
+            ft.DataColumn(ft.Text("Produto",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Estoque",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Quantidade",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Ação",color=ft.colors.BLACK)),
         ],
         rows=[],  # Inicialmente vazio
-        bgcolor=ft.colors.GREEN,
         border_radius=10,
     )
 
@@ -125,18 +125,22 @@ def main(page: ft.Page):
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
             [
-                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color="black"),
+                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK,),
                 ft.Divider(height=10, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar", width=200, ref=pesquisa_input),
+                    ft.TextField(label="Pesquisar",color=ft.colors.BLACK,width=200, ref=pesquisa_input),
                     ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.value)),
                 ]),
-                # Use Scrollable para a rolagem
-                ft.Scrollable(
-                    ft.Container(
-                        content=produtos_table,
-                        expand=True
-                    )
+                ft.Container(
+                    content=ft.ListView(
+                        controls=[produtos_table],
+                        width=650,  # Defina a largura desejada para a tabela
+                        height=500,  # Defina a altura desejada para a tabela (opcional)
+                        padding=10,  
+                        
+                    ),
+                    border_radius=20,
+                    bgcolor="#f2f2f2",
                 ),
             ]
         )
@@ -158,10 +162,10 @@ def main(page: ft.Page):
     def mostrar_tela_cadastro():
         return ft.Column(
             [
-                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color="black"),
-                ft.TextField(label="Nome do Produto", hint_text="Insira o nome", width=300),
-                ft.TextField(label="Preço", width=300, keyboard_type=ft.KeyboardType.NUMBER, color="black", hint_text="Digite o valor"),
-                ft.TextField(label="Quantidade em Estoque", width=300, keyboard_type=ft.KeyboardType.NUMBER, color="black", hint_text="Digite a quantidade"),
+                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
+                ft.TextField(label="Nome do Produto", hint_text="Insira o nome",color=ft.colors.BLACK, width=300),
+                ft.TextField(label="Preço", width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor"),
+                ft.TextField(label="Quantidade em Estoque", width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
                 ft.ElevatedButton(
                     "Adicionar Produto",
                     color=ft.colors.BLACK,
