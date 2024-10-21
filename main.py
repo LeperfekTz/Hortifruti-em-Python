@@ -55,12 +55,9 @@ def main(page: ft.Page):
         
         return produtos  # Retorna os produtos encontrados
 
-
-
-
     # Função para listar produtos na tabela
     def listar_produtos(pesquisa=None):
-        produtos = obter_produtos(pesquisa)  # Presumindo que esta função agora aceita um parâmetro de pesquisa
+        produtos = obter_produtos(pesquisa)  # Função que busca produtos no banco de dados
         data_rows = []  # Lista para armazenar as linhas da tabela
 
         for produto in produtos:
@@ -72,7 +69,7 @@ def main(page: ft.Page):
                 border_color=ft.colors.BLACK,
             )
             
-            # Usar um parâmetro padrão 'p' para capturar o valor atual de 'produto'
+            # Captura os valores de 'produto' e 'quantidade_input'
             venda_button = ft.ElevatedButton(
                 "Vender",
                 on_click=lambda e, p=produto, q=quantidade_input: vender_produto(e, p, q)
@@ -84,7 +81,7 @@ def main(page: ft.Page):
                     ft.DataCell(ft.Text(str(produto[0]), color=ft.colors.BLACK)),  # ID do produto
                     ft.DataCell(ft.Text(produto[1], color=ft.colors.BLACK)),  # Nome do produto
                     ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
-                    ft.DataCell(ft.Text(produto[4], color=ft.colors.BLACK)),  # Quantidade em estoque
+                    ft.DataCell(ft.Text(str(produto[4]), color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
                     ft.DataCell(venda_button),  # Botão de venda
                 ])
@@ -94,37 +91,37 @@ def main(page: ft.Page):
         produtos_table.rows = data_rows
         page.update()
 
-    # Função para lidar com a busca
+    # Função para buscar produtos
     def buscar_produtos():
-        pesquisa = pesquisa_input.current.value  # Presumindo que você tenha um campo de entrada para pesquisa
+        pesquisa = pesquisa_input.value  # Certifique-se de que 'pesquisa_input' é um campo de entrada definido corretamente
         listar_produtos(pesquisa)
 
     # Botão de busca
-    ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
-
+    search_button = ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
 
     # Função para processar a venda de um produto
     def vender_produto(e, produto, quantidade_input):
         try:
             quantidade = int(quantidade_input.value)
-            if quantidade > 0 and quantidade <= produto[2]:
+            if quantidade > 0 and quantidade <= produto[4]: 
                 conn = conectar_db()
                 if conn:
                     cursor = conn.cursor()
                     cursor.execute(
-                        "UPDATE produtos SET quantidade = quantidade - ? WHERE nome = ?",
-                        (quantidade, produto[0])
+                        "UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?",  # Corrigido para usar o ID
+                        (quantidade, produto[0])  # Usando o ID do produto
                     )
                     conn.commit()
                     conn.close()
 
                     page.snack_bar = ft.SnackBar(
-                        ft.Text(f"{quantidade} unidades de {produto[0]} vendidas!", color=ft.colors.GREEN))
+                        ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.colors.GREEN)
+                    )
                     page.snack_bar.open = True
                     page.update()
 
                     # Atualiza a tabela de produtos após a venda
-                    listar_produtos()  # Chama a função para atualizar a listagem de produtos
+                    listar_produtos()  # Atualiza a listagem
                 else:
                     page.snack_bar = ft.SnackBar(
                         ft.Text("Erro ao conectar ao banco de dados.", color=ft.colors.RED)
@@ -147,12 +144,12 @@ def main(page: ft.Page):
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Produto",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Preço",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Estoque",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Quantidade",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Ação",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Estoque", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Ação", color=ft.colors.BLACK)),
         ],
         rows=[],  # Inicialmente vazio
         border_radius=10,
