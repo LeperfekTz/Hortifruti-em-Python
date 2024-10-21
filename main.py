@@ -61,7 +61,7 @@ def main(page: ft.Page):
                     ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
                     ft.DataCell(ft.Text(produto[4], color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
-                    ft.DataCell(venda_button),  # Botão de venda
+                    ft.DataCell(venda_button),
                 ])
             )
 
