@@ -2,6 +2,7 @@ import flet as ft
 import sqlite3
 import logging
 
+
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -26,7 +27,7 @@ def main(page: ft.Page):
         conn = conectar_db()  # Chama a função para conectar ao banco de dados
         if conn is not None:
             cursor = conn.cursor()
-            cursor.execute("SELECT nome, preco, quantidade FROM produtos")
+            cursor.execute("SELECT * FROM produtos")
             produtos = cursor.fetchall()
             conn.close()  # Fecha a conexão após a operação
             return produtos  # Retorna a lista de tuplas
@@ -35,7 +36,7 @@ def main(page: ft.Page):
 
     # Função para listar produtos na tabela
     def listar_produtos():
-        produtos = obter_produtos()
+        produtos = obter_produtos()  # Presumindo que esta função retorna uma lista de tuplas
         data_rows = []  # Lista para armazenar as linhas da tabela
 
         for produto in produtos:
@@ -46,6 +47,7 @@ def main(page: ft.Page):
                 color=ft.colors.BLACK,
                 border_color=ft.colors.BLACK,
             )
+            
             venda_button = ft.ElevatedButton(
                 "Vender",
                 on_click=lambda e, p=produto, q=quantidade_input: vender_produto(e, p, q)
@@ -54,18 +56,19 @@ def main(page: ft.Page):
             # Adiciona uma linha de dados para a tabela
             data_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(produto[0],color=ft.colors.BLACK)),  # Nome do produto
-                    ft.DataCell(ft.Text(f"R$ {produto[1]:.2f}",color=ft.colors.BLACK)),  # Preço do produto
-                    ft.DataCell(ft.Text(produto[2],color=ft.colors.BLACK)),  # Quantidade em estoque
+                    ft.DataCell(ft.Text(str(produto[0]), color=ft.colors.BLACK)),  # ID do produto
+                    ft.DataCell(ft.Text(produto[1], color=ft.colors.BLACK)),  # Nome do produto
+                    ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
+                    ft.DataCell(ft.Text(produto[4], color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
                     ft.DataCell(venda_button),  # Botão de venda
                 ])
             )
 
-
         # Atualiza a tabela com as novas linhas
         produtos_table.rows = data_rows
         page.update()
+
 
     # Função para processar a venda de um produto
     def vender_produto(e, produto, quantidade_input):
@@ -111,6 +114,7 @@ def main(page: ft.Page):
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
         columns=[
+            ft.DataColumn(ft.Text("ID",color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Produto",color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Preço",color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Estoque",color=ft.colors.BLACK)),
@@ -127,18 +131,18 @@ def main(page: ft.Page):
         return ft.Column(
             [
                 ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK,),
-                ft.Divider(height=10, thickness=1),
+                ft.Divider(height=5, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar",color=ft.colors.BLACK,width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.value)),
+                    ft.TextField(label="Pesquisar", color=ft.colors.BLACK, width=200, ref=pesquisa_input),
+                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)),  # Corrigido
                 ]),
                 ft.Container(
                     content=ft.ListView(
                         controls=[produtos_table],
-                        width=650,  # Defina a largura desejada para a tabela
+                        width=800,  # Defina a largura desejada para a tabela
                         height=500,  # Defina a altura desejada para a tabela (opcional)
                     ),
-                    padding=10,
+                    padding=5,
                     border=ft.Border(
                         top=ft.BorderSide(color=ft.colors.GREEN, width=2),
                         bottom=ft.BorderSide(color=ft.colors.GREEN, width=2),
@@ -150,6 +154,9 @@ def main(page: ft.Page):
                 ),
             ]
         )
+
+# Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
+
 
     # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
