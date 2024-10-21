@@ -12,7 +12,7 @@ def main(page: ft.Page):
     page.title = "ERP Hortifruti"
     page.bgcolor = "#f2f2f2"  # Cor de fundo do app
 
-    # Conectar ao banco de dados
+        # Conectar ao banco de dados
     def conectar_db():
         try:
             conn = sqlite3.connect('database_hortifruti-py.db')
@@ -23,20 +23,44 @@ def main(page: ft.Page):
             return None  # Retorna None em caso de erro
 
     # Função para obter produtos do banco de dados
-    def obter_produtos():
-        conn = conectar_db()  # Chama a função para conectar ao banco de dados
-        if conn is not None:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM produtos")
-            produtos = cursor.fetchall()
-            conn.close()  # Fecha a conexão após a operação
-            return produtos  # Retorna a lista de tuplas
-        else:
+    # Função para obter produtos do banco de dados
+    def obter_produtos(pesquisa=None, id_produto=None):
+        conn = conectar_db()  # Conecta ao banco de dados
+        if conn is None:
             return []  # Retorna uma lista vazia se a conexão falhar
 
+        cursor = conn.cursor()  # Cria o cursor a partir da conexão
+
+        if id_produto is not None:
+            query = "SELECT * FROM produtos WHERE id = ?"
+            parametros = (id_produto,)  # Busca pelo ID específico
+
+        elif pesquisa:
+            query = "SELECT * FROM produtos WHERE nome LIKE ?"
+            parametros = (f"%{pesquisa}%",)  # Wildcards para busca pelo nome
+        
+        else:
+            query = "SELECT * FROM produtos"
+            parametros = ()
+        
+        try:
+            cursor.execute(query, parametros)  # Execute a consulta
+            produtos = cursor.fetchall()  # Obtenha todos os resultados
+        except sqlite3.Error as e:
+            logging.error(f"Erro ao obter produtos: {e}")
+            produtos = []  # Retorna uma lista vazia em caso de erro
+        finally:
+            cursor.close()  # Fecha o cursor
+            conn.close()  # Fecha a conexão com o banco de dados
+        
+        return produtos  # Retorna os produtos encontrados
+
+
+
+
     # Função para listar produtos na tabela
-    def listar_produtos():
-        produtos = obter_produtos()  # Presumindo que esta função retorna uma lista de tuplas
+    def listar_produtos(pesquisa=None):
+        produtos = obter_produtos(pesquisa)  # Presumindo que esta função agora aceita um parâmetro de pesquisa
         data_rows = []  # Lista para armazenar as linhas da tabela
 
         for produto in produtos:
@@ -48,6 +72,7 @@ def main(page: ft.Page):
                 border_color=ft.colors.BLACK,
             )
             
+            # Usar um parâmetro padrão 'p' para capturar o valor atual de 'produto'
             venda_button = ft.ElevatedButton(
                 "Vender",
                 on_click=lambda e, p=produto, q=quantidade_input: vender_produto(e, p, q)
@@ -61,13 +86,21 @@ def main(page: ft.Page):
                     ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
                     ft.DataCell(ft.Text(produto[4], color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
-                    ft.DataCell(venda_button),
+                    ft.DataCell(venda_button),  # Botão de venda
                 ])
             )
 
         # Atualiza a tabela com as novas linhas
         produtos_table.rows = data_rows
         page.update()
+
+    # Função para lidar com a busca
+    def buscar_produtos():
+        pesquisa = pesquisa_input.current.value  # Presumindo que você tenha um campo de entrada para pesquisa
+        listar_produtos(pesquisa)
+
+    # Botão de busca
+    ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
 
 
     # Função para processar a venda de um produto
