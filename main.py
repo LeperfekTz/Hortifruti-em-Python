@@ -129,15 +129,19 @@ def main(page: ft.Page):
                     page.snack_bar.open = True
                     page.update()
             else:
-                page.snack_bar = ft.SnackBar(
-                    ft.Text("Quantidade inválida ou maior que o estoque disponível.", color=ft.colors.RED)
+                show_popup(
+                    "Erro",
+                    "Quantidade inválida ou maior que o estoque disponível."
                 )
                 page.snack_bar.open = True
                 page.update()
         except ValueError:
-            page.snack_bar = ft.SnackBar(
-                ft.Text("Insira um valor numérico válido para a quantidade.", color=ft.colors.RED)
+            show_popup(
+                "Erro", 
+            "Insira um valor numérico válido para a quantidade.",
+            color=ft.colors.RED
             )
+                
             page.snack_bar.open = True
             page.update()
 
@@ -226,6 +230,33 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
+    def show_popup(title, message, color=ft.colors.RED):
+        # Cria o conteúdo do dialog
+        dialog = ft.AlertDialog(
+            title=ft.Text(title, color=ft.colors.BLACK),  # Título do popup
+            content=ft.Text(message, color=ft.colors.WHITE),  # Mensagem do popup
+            actions=[
+                ft.TextButton("OK", on_click=lambda e: close_popup(dialog)),  # Botão de fechar o popup
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,  # Alinha o botão à direita
+            bgcolor=color,  # Cor de fundo do popup
+            shape=ft.RoundedRectangleBorder(radius=10),  # Forma arredondada
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+
+    # Função para fechar o AlertDialog
+    def close_popup(dialog):
+        dialog.open = False
+        page.update()
+
+
+    # Função para fechar o SnackBar
+    def close_snack_bar():
+        page.snack_bar.open = False
+        page.update()
+
 
     # Função para alternar entre telas com base na seleção da NavigationRail
     def trocar_tela(e):
@@ -245,8 +276,9 @@ def main(page: ft.Page):
         label_type=ft.NavigationRailLabelType.ALL,
         min_width=100,
         bgcolor=ft.colors.GREEN,
+        indicator_color=ft.colors.GREEN_ACCENT,
         min_extended_width=200,
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
+        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=70,height=40, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
         destinations=[
             ft.NavigationRailDestination(
