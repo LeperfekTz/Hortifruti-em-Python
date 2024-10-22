@@ -159,14 +159,6 @@ def main(page: ft.Page):
         border_radius=10,
     )
 
-    historico_table = ft.DataRow(
-        columns=[
-            ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
-            
-        ]
-    )
-
     # Adiciona a tabela ao corpo da tela de vendas
     def mostrar_tela_vendas():
         listar_produtos()  # Preenche a tabela com produtos
