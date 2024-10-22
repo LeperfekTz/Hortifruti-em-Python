@@ -189,9 +189,6 @@ def main(page: ft.Page):
             ]
         )
 
-# Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
-
-
     # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
         return ft.Column(
