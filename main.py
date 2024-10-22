@@ -55,12 +55,9 @@ def main(page: ft.Page):
         
         return produtos  # Retorna os produtos encontrados
 
-
-
-
     # Função para listar produtos na tabela
     def listar_produtos(pesquisa=None):
-        produtos = obter_produtos(pesquisa)  # Presumindo que esta função agora aceita um parâmetro de pesquisa
+        produtos = obter_produtos(pesquisa)  # Função que busca produtos no banco de dados
         data_rows = []  # Lista para armazenar as linhas da tabela
 
         for produto in produtos:
@@ -72,7 +69,7 @@ def main(page: ft.Page):
                 border_color=ft.colors.BLACK,
             )
             
-            # Usar um parâmetro padrão 'p' para capturar o valor atual de 'produto'
+            # Captura os valores de 'produto' e 'quantidade_input'
             venda_button = ft.ElevatedButton(
                 "Vender",
                 on_click=lambda e, p=produto, q=quantidade_input: vender_produto(e, p, q)
@@ -84,7 +81,7 @@ def main(page: ft.Page):
                     ft.DataCell(ft.Text(str(produto[0]), color=ft.colors.BLACK)),  # ID do produto
                     ft.DataCell(ft.Text(produto[1], color=ft.colors.BLACK)),  # Nome do produto
                     ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
-                    ft.DataCell(ft.Text(produto[4], color=ft.colors.BLACK)),  # Quantidade em estoque
+                    ft.DataCell(ft.Text(str(produto[4]), color=ft.colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
                     ft.DataCell(venda_button),  # Botão de venda
                 ])
@@ -94,37 +91,37 @@ def main(page: ft.Page):
         produtos_table.rows = data_rows
         page.update()
 
-    # Função para lidar com a busca
+    # Função para buscar produtos
     def buscar_produtos():
-        pesquisa = pesquisa_input.current.value  # Presumindo que você tenha um campo de entrada para pesquisa
+        pesquisa = pesquisa_input.value  # Certifique-se de que 'pesquisa_input' é um campo de entrada definido corretamente
         listar_produtos(pesquisa)
 
     # Botão de busca
-    ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
-
+    search_button = ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
 
     # Função para processar a venda de um produto
     def vender_produto(e, produto, quantidade_input):
         try:
             quantidade = int(quantidade_input.value)
-            if quantidade > 0 and quantidade <= produto[2]:
+            if quantidade > 0 and quantidade <= produto[4]: 
                 conn = conectar_db()
                 if conn:
                     cursor = conn.cursor()
                     cursor.execute(
-                        "UPDATE produtos SET quantidade = quantidade - ? WHERE nome = ?",
-                        (quantidade, produto[0])
+                        "UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?",  # Corrigido para usar o ID
+                        (quantidade, produto[0])  # Usando o ID do produto
                     )
                     conn.commit()
                     conn.close()
 
                     page.snack_bar = ft.SnackBar(
-                        ft.Text(f"{quantidade} unidades de {produto[0]} vendidas!", color=ft.colors.GREEN))
+                        ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.colors.GREEN)
+                    )
                     page.snack_bar.open = True
                     page.update()
 
                     # Atualiza a tabela de produtos após a venda
-                    listar_produtos()  # Chama a função para atualizar a listagem de produtos
+                    listar_produtos()  # Atualiza a listagem
                 else:
                     page.snack_bar = ft.SnackBar(
                         ft.Text("Erro ao conectar ao banco de dados.", color=ft.colors.RED)
@@ -132,30 +129,42 @@ def main(page: ft.Page):
                     page.snack_bar.open = True
                     page.update()
             else:
-                page.snack_bar = ft.SnackBar(
-                    ft.Text("Quantidade inválida ou maior que o estoque disponível.", color=ft.colors.RED)
+                show_popup(
+                    "Erro",
+                    "Quantidade inválida ou maior que o estoque disponível."
                 )
                 page.snack_bar.open = True
                 page.update()
         except ValueError:
-            page.snack_bar = ft.SnackBar(
-                ft.Text("Insira um valor numérico válido para a quantidade.", color=ft.colors.RED)
+            show_popup(
+                "Erro", 
+            "Insira um valor numérico válido para a quantidade.",
+            color=ft.colors.RED_900
             )
+                
             page.snack_bar.open = True
             page.update()
 
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Produto",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Preço",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Estoque",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Quantidade",color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Ação",color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Estoque", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Ação", color=ft.colors.BLACK)),
         ],
         rows=[],  # Inicialmente vazio
         border_radius=10,
+    )
+
+    historico_table = ft.DataRow(
+        columns=[
+            ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
+            
+        ]
     )
 
     # Adiciona a tabela ao corpo da tela de vendas
@@ -229,6 +238,33 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
+    def show_popup(title, message, color=ft.colors.RED):
+        # Cria o conteúdo do dialog
+        dialog = ft.AlertDialog(
+            title=ft.Text(title, color=ft.colors.BLACK),  # Título do popup
+            content=ft.Text(message, color=ft.colors.WHITE),  # Mensagem do popup
+            actions=[
+                ft.TextButton("OK", on_click=lambda e: close_popup(dialog)),  # Botão de fechar o popup
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,  # Alinha o botão à direita
+            bgcolor=color,  # Cor de fundo do popup
+            shape=ft.RoundedRectangleBorder(radius=10),  # Forma arredondada
+        )
+        page.dialog = dialog
+        dialog.open = True
+        page.update()
+
+    # Função para fechar o AlertDialog
+    def close_popup(dialog):
+        dialog.open = False
+        page.update()
+
+
+    # Função para fechar o SnackBar
+    def close_snack_bar():
+        page.snack_bar.open = False
+        page.update()
+
 
     # Função para alternar entre telas com base na seleção da NavigationRail
     def trocar_tela(e):
@@ -248,8 +284,9 @@ def main(page: ft.Page):
         label_type=ft.NavigationRailLabelType.ALL,
         min_width=100,
         bgcolor=ft.colors.GREEN,
+        indicator_color=ft.colors.BLACK,
         min_extended_width=200,
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
+        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
         destinations=[
             ft.NavigationRailDestination(
