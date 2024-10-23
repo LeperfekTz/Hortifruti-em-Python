@@ -206,51 +206,55 @@ def main(page: ft.Page):
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
             [
-                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK,),
+                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
                 ft.Divider(height=5, thickness=1),
                 ft.Row([
                     ft.TextField(label="Pesquisar", color=ft.colors.BLACK, width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)),  # Corrigido
+                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
-                    [
-                        ft.Container(
-                            content=ft.ListView(
-                                controls=[produtos_table],
-                                width=700,  # Largura ajustada para caber lado a lado
-                                height=500,
-                            ),
-                            padding=5,
-                            border=ft.Border(
-                                top=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                bottom=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                left=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                right=ft.BorderSide(color=ft.colors.GREEN, width=2)
-                            ),
-                            border_radius=10,
-                            bgcolor="#f2f2f2",
+                    alignment=ft.MainAxisAlignment.START,  # Alinhamento horizontal
+                    controls=[
+                        ft.Column(  # Coluna para produtos
+                            controls=[
+                                ft.Text("Produtos", color='black', weight=ft.FontWeight.W_200, size=30),
+                                ft.Container(
+                                    content=ft.ListView(
+                                        controls=[produtos_table],
+                                        width=700,  # Largura ajustada para caber lado a lado
+                                        height=500,
+                                    ),
+                                    padding=5,
+                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border_radius=10,
+                                    bgcolor="#f2f2f2",
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
                         ),
-                        ft.Container(
-                            content=ft.ListView(
-                                controls=[historico_table],
-                                width=400,  # Largura ajustada para caber lado a lado
-                                height=500,
-                            ),
-                            padding=5,
-                            border=ft.Border(
-                                top=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                bottom=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                left=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                                right=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                            ),
-                            border_radius=10,
-                            bgcolor="#f2f2f2",
-                        ),
-                    ],
-                    alignment=ft.MainAxisAlignment.SPACE_AROUND  # Alinha as tabelas com espaçamento
-                )
-            ]
+                        ft.Column(  # Coluna para histórico de vendas
+                            controls=[
+                                ft.Text("Histórico de vendas", color='black', weight=ft.FontWeight.W_200, size=30),
+                                ft.Container(
+                                    content=ft.ListView( 
+                                        controls=[historico_table],
+                                        width=400,  # Largura ajustada para caber lado a lado
+                                        height=500,
+                                    ),
+                                    padding=5,
+                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border_radius=10, 
+                                    bgcolor="#f2f2f2",
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
+                        ), 
+                    ]
+                ) 
+            ] 
         )
+
+
 
 # Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
 
@@ -341,7 +345,7 @@ def main(page: ft.Page):
         bgcolor=ft.colors.GREEN,
         indicator_color='black',
         min_extended_width=200,
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=70,height=40, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
+        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
         destinations=[
             ft.NavigationRailDestination(
@@ -382,7 +386,4 @@ def main(page: ft.Page):
             expand=True
         )
     )
-
-# Executa a aplicação
-if __name__ == "__main__":
-    ft.app(target=main)
+ft.app(target=main) 
