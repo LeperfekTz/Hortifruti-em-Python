@@ -3,6 +3,7 @@ import sqlite3
 import logging
 
 
+
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -11,6 +12,7 @@ pesquisa_input = ft.Ref[ft.TextField]()
 def main(page: ft.Page):
     page.title = "ERP Hortifruti"
     page.bgcolor = "#f2f2f2"  # Cor de fundo do app
+    #page.window_maximized=True    
 
         # Conectar ao banco de dados
     def conectar_db():
@@ -91,6 +93,33 @@ def main(page: ft.Page):
         produtos_table.rows = data_rows
         page.update()
 
+    def listar_historico():
+        conn = connect_db()
+        if conn is None:
+            return
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM historico_vendas")
+        sales = cursor.fetchall()
+
+        # Clear the current lines of the historic
+        historic_rows = []
+
+        for sale in sales:
+            historic_rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(sale[0], color=ft.colors.BLACK)),  # Product
+                    ft.DataCell(ft.Text(str(sale[1]), color=ft.colors.BLACK)),  # Quantity
+                    ft.DataCell(ft.Text(f"R$ {float(sale[2]):.2f}", color=ft.colors.BLACK)),  # Total Price
+                    ft.DataCell(ft.Text(sale[3], color=ft.colors.BLACK))  # Sale Date
+                ])
+            )
+
+        historic_table.rows = historic_rows
+        page.update()
+        conn.close()
+
+
     # Função para buscar produtos
     def buscar_produtos():
         pesquisa = pesquisa_input.value  # Certifique-se de que 'pesquisa_input' é um campo de entrada definido corretamente
@@ -121,7 +150,8 @@ def main(page: ft.Page):
                     page.update()
 
                     # Atualiza a tabela de produtos após a venda
-                    listar_produtos()  # Atualiza a listagem
+                    listar_produtos() 
+                    listar_historico() # Atualiza a listagem
                 else:
                     page.snack_bar = ft.SnackBar(
                         ft.Text("Erro ao conectar ao banco de dados.", color=ft.colors.RED)
@@ -139,7 +169,7 @@ def main(page: ft.Page):
             show_popup(
                 "Erro", 
             "Insira um valor numérico válido para a quantidade.",
-            color=ft.colors.RED_900
+            color=ft.colors.RED
             )
                 
             page.snack_bar.open = True
@@ -159,35 +189,75 @@ def main(page: ft.Page):
         border_radius=10,
     )
 
+    historico_table = ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("quantidade", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Ação", color=ft.colors.BLACK)),
+        ],
+        rows=[],  # Inicialmente vazio
+        border_radius=10,
+    )
+
+    # Adiciona a tabela ao corpo da tela de vendas
     # Adiciona a tabela ao corpo da tela de vendas
     def mostrar_tela_vendas():
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
             [
-                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK,),
+                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
                 ft.Divider(height=5, thickness=1),
                 ft.Row([
                     ft.TextField(label="Pesquisar", color=ft.colors.BLACK, width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)),  # Corrigido
+                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
-                ft.Container(
-                    content=ft.ListView(
-                        controls=[produtos_table],
-                        width=800,  # Defina a largura desejada para a tabela
-                        height=500,  # Defina a altura desejada para a tabela (opcional)
-                    ),
-                    padding=5,
-                    border=ft.Border(
-                        top=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                        bottom=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                        left=ft.BorderSide(color=ft.colors.GREEN, width=2),
-                        right=ft.BorderSide(color=ft.colors.GREEN, width=2)
-                    ),
-                    border_radius=10,  # Borda arredondada
-                    bgcolor="#f2f2f2",  # Cor de fundo do contêiner
-                ),
-            ]
+                ft.Row(  # Coloca as tabelas lado a lado
+                    alignment=ft.MainAxisAlignment.START,  # Alinhamento horizontal
+                    controls=[
+                        ft.Column(  # Coluna para produtos
+                            controls=[
+                                ft.Text("Produtos", color='black', weight=ft.FontWeight.W_200, size=30),
+                                ft.Container(
+                                    content=ft.ListView(
+                                        controls=[produtos_table],
+                                        width=700,  # Largura ajustada para caber lado a lado
+                                        height=500,
+                                    ),
+                                    padding=5,
+                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border_radius=10,
+                                    bgcolor="#f2f2f2",
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
+                        ),
+                        ft.Column(  # Coluna para histórico de vendas
+                            controls=[
+                                ft.Text("Histórico de vendas", color='black', weight=ft.FontWeight.W_200, size=30),
+                                ft.Container(
+                                    content=ft.ListView( 
+                                        controls=[historico_table],
+                                        width=400,  # Largura ajustada para caber lado a lado
+                                        height=500,
+                                    ),
+                                    padding=5,
+                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border_radius=10, 
+                                    bgcolor="#f2f2f2",
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
+                        ), 
+                    ]
+                ) 
+            ] 
         )
+
+
+
+# Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
+
 
     # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
@@ -273,9 +343,9 @@ def main(page: ft.Page):
         label_type=ft.NavigationRailLabelType.ALL,
         min_width=100,
         bgcolor=ft.colors.GREEN,
-        indicator_color=ft.colors.BLACK,
+        indicator_color='black',
         min_extended_width=200,
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
+        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
         destinations=[
             ft.NavigationRailDestination(
