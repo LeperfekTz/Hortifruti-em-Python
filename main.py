@@ -3,7 +3,6 @@ import sqlite3
 import logging
 
 
-
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -11,8 +10,9 @@ pesquisa_input = ft.Ref[ft.TextField]()
 
 def main(page: ft.Page):
     page.title = "ERP Hortifruti"
-    page.bgcolor = "#f2f2f2"  # Cor de fundo do app
-    #page.window_maximized=True    
+    page.bgcolor = ft.colors.GREEN_100 # Cor de fundo do app
+    page.color= "black"
+
 
         # Conectar ao banco de dados
     def conectar_db():
@@ -65,16 +65,22 @@ def main(page: ft.Page):
         for produto in produtos:
             quantidade_input = ft.TextField(
                 hint_text="Qtd.",
+                label_style=ft.TextStyle(color=ft.colors.BLACK), 
+                border_color=ft.colors.GREEN,
+                color=ft.colors.BLACK,
                 width=80,
                 keyboard_type=ft.KeyboardType.NUMBER,
-                color=ft.colors.BLACK,
-                border_color=ft.colors.BLACK,
             )
             
             # Captura os valores de 'produto' e 'quantidade_input'
             venda_button = ft.ElevatedButton(
-                "Vender",
-                on_click=lambda e, p=produto, q=quantidade_input: vender_produto(e, p, q)
+                "Adicionar",
+                on_click=lambda e,
+                p=produto,
+                q=quantidade_input: vender_produto(e, p, q),
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                color="black",
+                bgcolor="green", 
             )
             
             # Adiciona uma linha de dados para a tabela
@@ -209,8 +215,8 @@ def main(page: ft.Page):
                 ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
                 ft.Divider(height=5, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar", color=ft.colors.BLACK, width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar", on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
+                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
+                    ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
                     alignment=ft.MainAxisAlignment.START,  # Alinhamento horizontal
@@ -222,12 +228,11 @@ def main(page: ft.Page):
                                     content=ft.ListView(
                                         controls=[produtos_table],
                                         width=700,  # Largura ajustada para caber lado a lado
-                                        height=500,
+                                        height=400,
                                     ),
-                                    padding=5,
                                     border=ft.border.all(2, ft.colors.GREEN),
                                     border_radius=10,
-                                    bgcolor="#f2f2f2",
+                                    bgcolor="#f2f2f2", 
                                 ),
                             ],
                             alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
@@ -239,9 +244,8 @@ def main(page: ft.Page):
                                     content=ft.ListView( 
                                         controls=[historico_table],
                                         width=400,  # Largura ajustada para caber lado a lado
-                                        height=500,
-                                    ),
-                                    padding=5,
+                                        height=400,
+                                    ), 
                                     border=ft.border.all(2, ft.colors.GREEN),
                                     border_radius=10, 
                                     bgcolor="#f2f2f2",
@@ -270,25 +274,25 @@ def main(page: ft.Page):
             expand=True
         )
 
-    def mostrar_tela_cadastro():
+    def mostrar_tela_cadastro(): 
         return ft.Column(
             [
                 ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                ft.TextField(label="Nome do Produto", hint_text="Insira o nome",color=ft.colors.BLACK, width=300),
-                ft.TextField(label="Preço", width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor"),
-                ft.TextField(label="Quantidade em Estoque", width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
+                ft.TextField(label="Nome do Produto",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, hint_text="Insira o nome",color=ft.colors.BLACK, width=300),
+                ft.TextField(label="Preço", width=300,bgcolor="#f2f2f2", keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN,),
+                ft.TextField(label="Quantidade em Estoque",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
                 ft.ElevatedButton(
                     "Adicionar Produto",
-                    color=ft.colors.BLACK,
+                    color=ft.colors.BLACK, 
                     bgcolor=ft.colors.GREEN_300,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
-                ),
+                ), 
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
 
-    def mostrar_tela_relatorios():
+ 
         return ft.Column(
             [
                 ft.Text("Relatórios", size=30, weight=ft.FontWeight.BOLD, color="black"),
@@ -340,53 +344,61 @@ def main(page: ft.Page):
     # NavigationRail
     rail = ft.NavigationRail(
         selected_index=0,
-        label_type=ft.NavigationRailLabelType.ALL,
-        min_width=100,
-        bgcolor=ft.colors.GREEN,
+        label_type=ft.NavigationRailLabelType.ALL, 
+        min_width=100, 
+        bgcolor=ft.colors.GREEN_100,
         indicator_color='black',
-        min_extended_width=200,
+        indicator_shape=ft.RoundedRectangleBorder(radius=10),
         leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
         group_alignment=-0.9,
+        selected_label_text_style=ft.TextStyle(color="black"),  # Estilo do label selecionado
+        unselected_label_text_style=ft.TextStyle(color="black"),
         destinations=[
-            ft.NavigationRailDestination(
-                icon=ft.icons.ADD,
-                selected_icon=ft.icons.ADD,
-                label="Cadastro"
+            ft.NavigationRailDestination( 
+                icon_content=ft.Icon(ft.icons.ASSIGNMENT_ADD,color="black"),
+                selected_icon_content=ft.Icon(ft.icons.ASSIGNMENT_ADD,color="green"),   
+                label="Cadastro",
             ),
             ft.NavigationRailDestination(
                 icon=ft.icons.PAYMENT,
-                selected_icon=ft.icons.PAYMENT,
+                icon_content=ft.Icon(ft.icons.PAYMENT,color="black"),
+                selected_icon_content=ft.Icon(ft.icons.PAYMENT,color="green"),
                 label="Vendas",
             ),
             ft.NavigationRailDestination(
                 icon=ft.icons.RECEIPT_LONG,
-                selected_icon=ft.icons.RECEIPT_LONG,
+                icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="black"),
+                selected_icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="green"),
                 label="Relatórios",
             ),
             ft.NavigationRailDestination(
                 icon=ft.icons.POINT_OF_SALE,
-                selected_icon=ft.icons.POINT_OF_SALE,
-                label="Caixa",
+                icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="black"),
+                selected_icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="green"),
+                label="Caixa", 
             ),
         ],
         on_change=trocar_tela,
+
     )
 
-    # Conteúdo inicial do corpo da página
-    corpo = ft.Container(content=mostrar_tela_cadastro(), expand=True)
+    corpo = ft.Container(content=mostrar_tela_cadastro())
 
-    # Layout da página
+    # Corpo da aplicação
+
+
+
     page.add(
         ft.Row(
             [
                 rail,
-                ft.VerticalDivider(width=1),
+                ft.VerticalDivider(width=5 , color="black"),
                 corpo,
             ],
-            expand=True
+            expand=True,
         )
-    )
+    ) 
 
-
-ft.app(target=main) 
-
+# Executa a aplicação
+if __name__ == "__main__":
+    ft.app(target=main)  
