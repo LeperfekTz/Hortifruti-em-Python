@@ -360,19 +360,16 @@ def main(page: ft.Page):
                 label="Cadastro",
             ),
             ft.NavigationRailDestination(
-                icon=ft.icons.PAYMENT,
                 icon_content=ft.Icon(ft.icons.PAYMENT,color="black"),
                 selected_icon_content=ft.Icon(ft.icons.PAYMENT,color="green"),
                 label="Vendas",
             ),
             ft.NavigationRailDestination(
-                icon=ft.icons.RECEIPT_LONG,
                 icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="black"),
                 selected_icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="green"),
                 label="Relatórios",
             ),
             ft.NavigationRailDestination(
-                icon=ft.icons.POINT_OF_SALE,
                 icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="black"),
                 selected_icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="green"),
                 label="Caixa", 
