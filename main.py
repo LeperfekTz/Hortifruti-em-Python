@@ -8,15 +8,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 pesquisa_input = ft.Ref[ft.TextField]()
 
-historico_table = ft.DataTable(
-    columns=[
-        ft.DataColumn(ft.Text("Produto")),
-        ft.DataColumn(ft.Text("Preço")),
-        ft.DataColumn(ft.Text("Quantidade")),
-        ft.DataColumn(ft.Text("Ação")),
-    ],
-    rows=[]  # Inicialmente vazio, será preenchido com os dados do banco de dados
-)
 
 def main(page: ft.Page):
     page.title = "ERP Hortifruti"
@@ -104,6 +95,7 @@ def main(page: ft.Page):
         produtos_table.rows = data_rows
         page.update()
 
+
     def listar_historico():
         conn = conectar_db()
         if conn is None:
@@ -119,16 +111,16 @@ def main(page: ft.Page):
         for sale in sales:
             historic_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(sale[0], color=ft.colors.BLACK)),  # Product
-                    ft.DataCell(ft.Text(str(sale[1]), color=ft.colors.BLACK)),  # Quantity
-                    ft.DataCell(ft.Text(f"R$ {float(sale[2]):.2f}", color=ft.colors.BLACK)),  # Total Price
-                    ft.DataCell(ft.Text(sale[3], color=ft.colors.BLACK))  # Sale Date
+                    ft.DataCell(ft.Text(sale[1], color=ft.colors.BLACK)),  # Product 
+                    ft.DataCell(ft.Text(f"R$ {float(sale[3]):.2f}", color=ft.colors.BLACK)), 
+                    ft.DataCell(ft.Text(str(sale[2]), color=ft.colors.BLACK)),  #  Quantity # Total Price 
+                    ft.DataCell(ft.Text(sale[4], color=ft.colors.BLACK))  # Sale Date  
                 ])
             )
 
         historico_table.rows = historic_rows
         page.update()
-        conn.close()
+        conn.close() 
 
 
     # Função para buscar produtos
@@ -146,9 +138,9 @@ def main(page: ft.Page):
     def vender_produto(e, produto, quantidade_input):
         try:
             quantidade = int(quantidade_input.value)
-            
+
             # Verifica se a quantidade é válida
-            if quantidade > 0 and quantidade <= produto[4]: 
+            if quantidade > 0 and quantidade <= produto[4]:
                 conn = conectar_db()
                 if conn:
                     cursor = conn.cursor()
@@ -164,7 +156,13 @@ def main(page: ft.Page):
                         "INSERT INTO vendas (produto_id, quantidade, valor_total) VALUES (?, ?, ?)",
                         (produto[0], quantidade, quantidade * produto[2])  # Calcula valor_total
                     )
- 
+
+                    # Atualiza o historico de vendas
+                    cursor.execute(
+                        "INSERT INTO historico_vendas (produto, quantidade, preco_total, data_venda) VALUES (?, ?, ?, ?)",  # Corrigido de 'produtos' para 'produto'
+                        (produto[1], quantidade, quantidade * produto[2], dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    )
+                    
                     conn.commit()  # Confirma as alterações
                     conn.close()
 
@@ -199,7 +197,6 @@ def main(page: ft.Page):
             )
             page.snack_bar.open = True
             page.update()
-
 
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
