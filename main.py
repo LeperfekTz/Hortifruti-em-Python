@@ -10,11 +10,10 @@ pesquisa_input = ft.Ref[ft.TextField]()
 
 historico_table = ft.DataTable(
     columns=[
-        ft.DataColumn(ft.Text("ID")),
         ft.DataColumn(ft.Text("Produto")),
+        ft.DataColumn(ft.Text("Preço")),
         ft.DataColumn(ft.Text("Quantidade")),
-        ft.DataColumn(ft.Text("Preço Total")),
-        ft.DataColumn(ft.Text("Data Venda")),
+        ft.DataColumn(ft.Text("Ação")),
     ],
     rows=[]  # Inicialmente vazio, será preenchido com os dados do banco de dados
 )
@@ -106,12 +105,12 @@ def main(page: ft.Page):
         page.update()
 
     def listar_historico():
-        conn = connect_db()
+        conn = conectar_db()
         if conn is None:
             return
 
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM historico_vendas")
+        cursor.execute("SELECT * FROM historico_vendas") 
         sales = cursor.fetchall()
 
         # Clear the current lines of the historic
@@ -127,7 +126,7 @@ def main(page: ft.Page):
                 ])
             )
 
-        historic_table.rows = historic_rows
+        historico_table.rows = historic_rows
         page.update()
         conn.close()
 
@@ -142,29 +141,43 @@ def main(page: ft.Page):
     search_button = ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
 
     # Função para processar a venda de um produto
+    import datetime as dt  # Importar datetime, se necessário para outras partes do código
+
     def vender_produto(e, produto, quantidade_input):
         try:
             quantidade = int(quantidade_input.value)
+            
+            # Verifica se a quantidade é válida
             if quantidade > 0 and quantidade <= produto[4]: 
                 conn = conectar_db()
                 if conn:
                     cursor = conn.cursor()
+
+                    # Atualiza a quantidade do produto na tabela produtos
                     cursor.execute(
-                        "UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?",  # Corrigido para usar o ID
+                        "UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?",
                         (quantidade, produto[0])  # Usando o ID do produto
                     )
-                    conn.commit()
+
+                    # Adiciona a venda na tabela vendas
+                    cursor.execute(
+                        "INSERT INTO vendas (produto_id, quantidade, valor_total) VALUES (?, ?, ?)",
+                        (produto[0], quantidade, quantidade * produto[2])  # Calcula valor_total
+                    )
+ 
+                    conn.commit()  # Confirma as alterações
                     conn.close()
 
+                    # Mensagem de sucesso
                     page.snack_bar = ft.SnackBar(
                         ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.colors.GREEN)
                     )
                     page.snack_bar.open = True
                     page.update()
 
-                    # Atualiza a tabela de produtos após a venda
+                    # Atualiza as tabelas de produtos e histórico
                     listar_produtos() 
-                    listar_historico() # Atualiza a listagem
+                    listar_historico()  # Atualiza a listagem
                 else:
                     page.snack_bar = ft.SnackBar(
                         ft.Text("Erro ao conectar ao banco de dados.", color=ft.colors.RED)
@@ -181,12 +194,12 @@ def main(page: ft.Page):
         except ValueError:
             show_popup(
                 "Erro", 
-            "Insira um valor numérico válido para a quantidade.",
-            color=ft.colors.RED
+                "Insira um valor numérico válido para a quantidade.",
+                color=ft.colors.RED
             )
-                
             page.snack_bar.open = True
             page.update()
+
 
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
@@ -250,11 +263,11 @@ def main(page: ft.Page):
                                 ft.Container(
                                     content=ft.ListView( 
                                         controls=[historico_table],
-                                        width=400,  # Largura ajustada para caber lado a lado
+                                        width=500,  # Largura ajustada para caber lado a lado
                                         height=400,
                                     ), 
                                     border=ft.border.all(2, ft.colors.GREEN),
-                                    border_radius=10, 
+                                    border_radius=10,  
                                     bgcolor="#f2f2f2",
                                 ),
                             ],
