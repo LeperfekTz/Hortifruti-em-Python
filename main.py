@@ -8,13 +8,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 pesquisa_input = ft.Ref[ft.TextField]()
 
+historico_table = ft.DataTable(
+    columns=[
+        ft.DataColumn(ft.Text("ID")),
+        ft.DataColumn(ft.Text("Produto")),
+        ft.DataColumn(ft.Text("Quantidade")),
+        ft.DataColumn(ft.Text("Preço Total")),
+        ft.DataColumn(ft.Text("Data Venda")),
+    ],
+    rows=[]  # Inicialmente vazio, será preenchido com os dados do banco de dados
+)
+
 def main(page: ft.Page):
     page.title = "ERP Hortifruti"
-    page.bgcolor = ft.colors.GREEN_100 # Cor de fundo do app
-    page.color= "black"
+    page.bgcolor = "#f2f2f2" # Cor de fundo do app
 
-
-        # Conectar ao banco de dados
     def conectar_db():
         try:
             conn = sqlite3.connect('database_hortifruti-py.db')
@@ -24,8 +32,6 @@ def main(page: ft.Page):
             logging.error(f"Erro ao conectar ao banco de dados: {e}")
             return None  # Retorna None em caso de erro
 
-    # Função para obter produtos do banco de dados
-    # Função para obter produtos do banco de dados
     def obter_produtos(pesquisa=None, id_produto=None):
         conn = conectar_db()  # Conecta ao banco de dados
         if conn is None:
@@ -130,6 +136,7 @@ def main(page: ft.Page):
     def buscar_produtos():
         pesquisa = pesquisa_input.value  # Certifique-se de que 'pesquisa_input' é um campo de entrada definido corretamente
         listar_produtos(pesquisa)
+        listar_historico()
 
     # Botão de busca
     search_button = ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
@@ -274,25 +281,86 @@ def main(page: ft.Page):
             expand=True
         )
 
-    def mostrar_tela_cadastro(): 
+
+    def adicionar_produto(nome, preco, quantidade, categoria):
+        conn = conectar_db()  # Usa a função de conexão
+        if conn is not None:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO produtos (nome, preco, quantidade, categoria) 
+                VALUES (?, ?, ?, ?)
+            ''', (nome, preco, quantidade, categoria))
+            conn.commit()
+            conn.close()
+        else:
+            logging.error("Não foi possível conectar ao banco de dados.")
+
+    # Função para mostrar a tela de cadastro
+    def mostrar_tela_cadastro():
+        nome_produto = ft.TextField()
+        preco_produto = ft.TextField()
+        quantidade_produto = ft.TextField()
+
+        # Dropdown para seleção de categoria
+        categoria_dropdown = ft.Dropdown(
+            label="Categoria",
+            width=270,
+            bgcolor="#f2f2f2",
+            border_color="green",
+            border_width=1,
+            color="black", 
+            label_style=ft.TextStyle(color="black"),
+            options=[
+                ft.dropdown.Option("Frutas"),
+                ft.dropdown.Option("Verduras"),
+                ft.dropdown.Option("Legumes"),
+                ft.dropdown.Option("Grãos"),
+                ft.dropdown.Option("Laticínios"),
+            ],
+        )
+
+        def on_adicionar_produto(e):
+            nome = nome_produto.value
+            preco = float(preco_produto.value)  # Converte para float
+            quantidade = int(quantidade_produto.value)  # Converte para inteiro
+            categoria = categoria_dropdown.value  # Pega o valor selecionado do dropdown
+            adicionar_produto(nome, preco, quantidade, categoria)  # Passa a categoria
+
+            # Limpa os campos após adicionar
+            nome_produto.value = ""
+            preco_produto.value = ""
+            quantidade_produto.value = ""
+            categoria_dropdown.value = None  # Limpa a seleção do dropdown
+            
+            # Atualiza a interface
+            page.update()
+
         return ft.Column(
             [
                 ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                ft.TextField(label="Nome do Produto",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, hint_text="Insira o nome",color=ft.colors.BLACK, width=300),
-                ft.TextField(label="Preço", width=300,bgcolor="#f2f2f2", keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN,),
-                ft.TextField(label="Quantidade em Estoque",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
+                nome_produto := ft.TextField(label="Nome do Produto", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN, hint_text="Insira o nome", color=ft.colors.BLACK, width=300),
+                preco_produto := ft.TextField(label="Preço", width=300, bgcolor="#f2f2f2", keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN),
+                quantidade_produto := ft.TextField(label="Quantidade em Estoque", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN, width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
+                ft.Row(
+                    [
+                        categoria_dropdown,
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
                 ft.ElevatedButton(
                     "Adicionar Produto",
                     color=ft.colors.BLACK, 
                     bgcolor=ft.colors.GREEN_300,
-                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                    on_click=on_adicionar_produto  # Adiciona o evento de clique
                 ), 
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
 
- 
+    def mostrar_tela_relatorios():
         return ft.Column(
             [
                 ft.Text("Relatórios", size=30, weight=ft.FontWeight.BOLD, color="black"),
@@ -349,7 +417,7 @@ def main(page: ft.Page):
         bgcolor=ft.colors.GREEN_100,
         indicator_color='black',
         indicator_shape=ft.RoundedRectangleBorder(radius=10),
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50, text="Sair", bgcolor=ft.colors.RED_500, on_click=lambda e: page.window_destroy()),
+        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50,text="Sair",bgcolor=ft.colors.RED_500,on_click=lambda e: page.window.destroy()),
         group_alignment=-0.9,
         selected_label_text_style=ft.TextStyle(color="black"),  # Estilo do label selecionado
         unselected_label_text_style=ft.TextStyle(color="black"),
