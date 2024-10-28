@@ -3,6 +3,7 @@ import sqlite3
 import logging
 
 
+
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -152,11 +153,6 @@ def main(page: ft.Page):
                     )
 
                     # Adiciona a venda na tabela vendas
-                    cursor.execute(
-                        "INSERT INTO vendas (produto_id, quantidade, valor_total) VALUES (?, ?, ?)",
-                        (produto[0], quantidade, quantidade * produto[2])  # Calcula valor_total
-                    )
-
                     # Atualiza o historico de vendas
                     cursor.execute(
                         "INSERT INTO historico_vendas (produto, quantidade, preco_total, data_venda) VALUES (?, ?, ?, ?)",  # Corrigido de 'produtos' para 'produto'
@@ -222,9 +218,14 @@ def main(page: ft.Page):
         rows=[],  # Inicialmente vazio
         border_radius=10,
     )
+    def limpar_historico(e):
+        historico_table.rows.clear()  # Limpa todas as linhas da tabela 
+        conn = sqlite3.connect('database_hortifruti-py.db')  # Ajuste o caminho do banco de dados, se necessário
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM historico_vendas")
+        conn.commit() 
+        page.update()  # Atualiza a interface para refletir a alteração
 
-    # Adiciona a tabela ao corpo da tela de vendas
-    # Adiciona a tabela ao corpo da tela de vendas
     def mostrar_tela_vendas():
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
@@ -236,7 +237,7 @@ def main(page: ft.Page):
                     ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
-                    alignment=ft.MainAxisAlignment.START,  # Alinhamento horizontal
+                    alignment=ft.MainAxisAlignment.START,
                     controls=[
                         ft.Column(  # Coluna para produtos
                             controls=[
@@ -251,6 +252,15 @@ def main(page: ft.Page):
                                     border_radius=10,
                                     bgcolor="#f2f2f2", 
                                 ),
+                                ft.ElevatedButton(
+                                    "Editar produtos",
+                                    on_click=limpar_historico,
+                                    color="black",
+                                    bgcolor="green",
+                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
+                                    icon=ft.icons.EDIT_NOTE,
+                                    icon_color=ft.colors.RED,
+                                    )
                             ],
                             alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
                         ),
@@ -266,14 +276,25 @@ def main(page: ft.Page):
                                     border=ft.border.all(2, ft.colors.GREEN),
                                     border_radius=10,  
                                     bgcolor="#f2f2f2",
-                                ),
-                            ],
-                            alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
-                        ), 
-                    ]
-                ) 
-            ] 
-        )
+                                    ),
+                                ft.ElevatedButton(
+                                    "Limpar Histórico",
+                                    on_click=limpar_historico,
+                                    color="black",
+                                    bgcolor="green",
+                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
+                                    icon=ft.icons.DELETE,
+                                    icon_color=ft.colors.RED,
+                                    )
+                                    
+                                ],
+                                
+                                alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
+                            ),
+                        ]
+                    ) 
+                ] 
+            )
 
 
 
