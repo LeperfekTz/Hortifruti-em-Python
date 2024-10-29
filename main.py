@@ -1,7 +1,7 @@
 import flet as ft
 import sqlite3
 import logging
-
+#import editar_produtos
 
 
 # Configuração do logging
@@ -254,7 +254,7 @@ def main(page: ft.Page):
                                 ),
                                 ft.ElevatedButton(
                                     "Editar produtos",
-                                    on_click=limpar_historico,
+                                    #on_click=editar_produtos,
                                     color="black",
                                     bgcolor="green",
                                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
