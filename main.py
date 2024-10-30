@@ -2,7 +2,154 @@ import flet as ft
 import sqlite3
 import logging
 #import editar_produtos
+# Configuração do logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Função para carregar produtos do banco de dados
+def load_products():
+    conn = sqlite3.connect("database_hortifruti-py.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM produtos")
+    products = cursor.fetchall()
+    conn.close()
+    return products
+
+# Função para abrir o diálogo de edição de produtos
+def abrir_janela_edicao(page):
+    # Carrega produtos do banco de dados
+    page.bgcolor="#f2f2f2"
+
+
+    products = load_products()
+    product_rows = []
+    product_list = ft.Column(scroll=ft.ScrollMode.AUTO)
+
+    # Função para salvar mudanças
+    def save_changes(e):
+        for row in product_rows:
+            product_id = row['id']
+            name = row['name'].value
+            price = float(row['price'].value)
+            category = row['category'].value
+            quantity = int(row['quantity'].value)
+            update_product(product_id, name, price, category, quantity)
+        
+        page.snack_bar = ft.SnackBar(ft.Text("Alterações salvas com sucesso!"), bgcolor="green")
+        page.snack_bar.open = True
+        page.update()
+
+    # Função para excluir um produto
+    def delete_product_row(e, product_id):
+        delete_product(product_id)
+        for row in product_rows:
+            if row['id'] == product_id:
+                product_list.controls.remove(row['row'])
+                product_rows.remove(row)
+                break
+        page.update()
+
+    # Função para filtrar produtos
+    def filter_products(e):
+        search_term = search_field.value.lower()
+        product_list.controls.clear()
+        for product in products:
+            product_id, name, price, category, quantity = product
+            if (search_term in name.lower() or
+                search_term in category.lower() or
+                search_term in str(price)):
+                
+                # Campos de edição do produto
+                name_field = ft.TextField(value=name, max_length=25, color="black", bgcolor=ft.colors.GREEN_400, width=140, height=60)
+                price_field = ft.TextField(value=str(price), max_length=10, color="black", bgcolor=ft.colors.GREEN_400, width=100, height=60)
+                category_field = ft.TextField(value=category, max_length=15, color="black", bgcolor=ft.colors.GREEN_400, width=100, height=60)
+                quantity_field = ft.TextField(value=str(quantity), max_length=3, color="black", bgcolor=ft.colors.GREEN_400, width=100, height=60)
+                
+                # Linha de produto
+                row = {
+                    'id': product_id,
+                    'name': name_field,
+                    'price': price_field,
+                    'category': category_field,
+                    'quantity': quantity_field,
+                    'row': ft.Row(
+                        [
+                            ft.Text(value=product_id, color="black", width=50, size=15),
+                            name_field,
+                            price_field,
+                            category_field,
+                            quantity_field,
+                            ft.IconButton(
+                                icon=ft.icons.DELETE,
+                                icon_color=ft.colors.RED,
+                                tooltip="Excluir Produto",
+                                on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),
+                            )
+                        ],
+                        alignment="start",
+                        spacing=5,
+                    )
+                }
+                product_rows.append(row)
+                product_list.controls.append(row['row'])
+        page.update()
+
+    # Campo de pesquisa
+    search_field = ft.TextField(
+        label="Pesquisar produtos...",
+        width=300,
+        bgcolor="#f2f2f2",
+        label_style=ft.TextStyle(color=ft.colors.BLACK),
+        border_color=ft.colors.GREEN,
+        color=ft.colors.BLACK,
+        autofocus=True,
+        on_change=filter_products,
+        icon=ft.icons.SEARCH
+    )
+
+    # Cabeçalho da tabela
+    table_header = ft.Row(
+        [
+            ft.Text("ID", width=30, color="black", text_align="START"),
+            ft.Text("Nome", width=140, color="black", text_align="center"),
+            ft.Text("Preço", width=100, color="black", text_align="center"),
+            ft.Text("Categoria", width=150, color="black", text_align="center"),
+            ft.Text("Qtd", width=75, color="black", text_align="start"),
+            ft.Text("Ação", width=100, color="black", text_align="start"),
+        ],
+        alignment="start",
+        spacing=5,
+    )
+
+    # Botão de salvar alterações
+    save_button = ft.ElevatedButton(
+        text="Salvar Alterações",
+        icon_color=ft.colors.GREEN,
+        icon=ft.icons.SAVE,
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+        color="WHITE",
+        on_click=save_changes
+    )
+
+    # Configuração do diálogo de edição
+    dialog = ft.AlertDialog(
+        title=ft.Text("Editar Produtos", size=20, weight="bold"),
+        content=ft.Column(
+            [
+                search_field,
+                table_header,
+                ft.Container(content=product_list, height=400, width=650),
+                save_button
+            ],
+            alignment="center",
+            spacing=10
+        ),
+        on_dismiss=lambda e: page.update(),
+        modal=True,
+        open=True
+    )
+
+    page.dialog = dialog
+    page.update()
 
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -254,13 +401,13 @@ def main(page: ft.Page):
                                 ),
                                 ft.ElevatedButton(
                                     "Editar produtos",
-                                    #on_click=editar_produtos,
+                                    on_click=lambda _: abrir_janela_edicao(page),
                                     color="black",
                                     bgcolor="green",
                                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
                                     icon=ft.icons.EDIT_NOTE,
                                     icon_color=ft.colors.RED,
-                                    )
+                                    ) 
                             ],
                             alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
                         ),

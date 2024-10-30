@@ -31,7 +31,7 @@ def delete_product(product_id):
     conn.close()
 
 # Função que inicializa a interface
-def main(page: ft.Page):
+def editar_produtos(page: ft.Page):
     page.title = "Editar Produtos"
     page.scroll = ft.ScrollMode.AUTO
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
@@ -168,5 +168,4 @@ def main(page: ft.Page):
         )
     )
 
-# Executa a aplicação
-ft.app(target=main)
+
