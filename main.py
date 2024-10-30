@@ -26,28 +26,34 @@ def delete_product(product_id):
 def abrir_janela_edicao(page):
     products = load_products()
     product_rows = []
-    product_list = ft.Column(scroll=ft.ScrollMode.AUTO, expand=True) 
+    product_list = ft.Column(scroll=ft.ScrollMode.AUTO, expand=True)
     page.update()
+
+    def product_exists(product_id):
+        conn = sqlite3.connect("database_hortifruti-py.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM produtos WHERE id = ?", (product_id,))
+        exists = cursor.fetchone() is not None
+        conn.close()
+        return exists
 
     def update_product(product_id, name, price, category, quantity):
         try:
             conn = sqlite3.connect("database_hortifruti-py.db")
             cursor = conn.cursor()
-
-            # Tente atualizar o produto
-            cursor.execute("""
-                UPDATE produtos
-                SET nome = ?, preco = ?, categoria = ?, quantidade = ?
-                WHERE id = ?
+            cursor.execute(""" 
+                UPDATE produtos 
+                SET nome = ?, preco = ?, categoria = ?, quantidade = ? 
+                WHERE id = ? 
             """, (name, price, category, quantity, product_id))
-
+            
+            affected_rows = cursor.rowcount  # Número de linhas afetadas
             conn.commit()
-            print(f"Produto {product_id} atualizado com sucesso.")
+            logging.info(f"Atualização: {affected_rows} linha(s) afetada(s).")  # Usando logging para depuração
         except Exception as e:
-            print(f"Erro ao atualizar o produto: {e}")
+            logging.error(f"Ocorreu um erro ao atualizar o produto: {e}")
         finally:
             conn.close()
-
 
     def save_changes(e):
         for row in product_rows:
@@ -57,35 +63,41 @@ def abrir_janela_edicao(page):
             category = row['category'].value
             quantity = int(row['quantity'].value)
 
-            logging.info(f"Atualizando produto ID {product_id}: nome={name}, preço={price}, categoria={category}, quantidade={quantity}")
-            
-            update_product(product_id, name, price, category, quantity)
+            # Verifica se o produto existe antes de tentar atualizar
+            if product_exists(product_id):
+                update_product(product_id, name, price, category, quantity)
+            else:
+                logging.warning(f"Produto com ID {product_id} não encontrado.")  # Mensagem de erro para depuração
 
-        page.snack_bar = ft.SnackBar(ft.Text("Alterações salvas com sucesso!"), bgcolor="green")
+        # Recarrega a lista de produtos após a atualização
+        product_rows.clear()  # Limpa a lista atual
+        products.clear()
+        products.extend(load_products())  # Recarrega os produtos
+
+        page.snack_bar = ft.SnackBar(ft.Text("Alterações salvas com sucesso!"), bgcolor="green") 
         page.snack_bar.open = True
         page.update()
 
-
-
-
     def delete_product_row(e, product_id):
-    # Verifica se o produto realmente existe antes de tentar deletá-lo
-        for row in product_rows:
-            if row['id'] == product_id:
-                try:
-                    delete_product(product_id)  # Remove o produto do banco de dados
-                    product_list.controls.remove(row['row'])  # Remove a linha da lista
-                    product_rows.remove(row)  # Remove da lista de produtos
-                    break
-                except Exception as ex:
-                    logging.error(f"Erro ao tentar deletar o produto: {ex}")
-                    page.snack_bar = ft.SnackBar(ft.Text("Erro ao excluir o produto!"), bgcolor="red")
-                    page.snack_bar.open = True
-                    page.update()
-                else:
-                    # Atualiza a página após a remoção
-                    page.update()
-
+        # Verifica se o produto realmente existe antes de tentar deletá-lo
+        if product_exists(product_id):
+            try:
+                delete_product(product_id)  # Remove o produto do banco de dados
+                for row in product_rows:
+                    if row['id'] == product_id:
+                        product_list.controls.remove(row['row'])  # Remove a linha da lista
+                        product_rows.remove(row)  # Remove da lista de produtos
+                        break
+            except Exception as ex:
+                logging.error(f"Erro ao tentar deletar o produto: {ex}")
+                page.snack_bar = ft.SnackBar(ft.Text("Erro ao excluir o produto!"), bgcolor="red")
+                page.snack_bar.open = True
+                page.update()
+            else:
+                # Atualiza a página após a remoção
+                page.update()
+        else:
+            logging.warning(f"Produto com ID {product_id} não encontrado para exclusão.")
 
     def filter_products(e):
         search_term = search_field.value.lower()
@@ -96,10 +108,10 @@ def abrir_janela_edicao(page):
                 search_term in category.lower() or
                 search_term in str(price)):
                 # Campos de edição do produto
-                name_field = ft.TextField(value=name, width=50)
-                price_field = ft.TextField(value=str(price), width=50)
-                category_field = ft.TextField(value=category, width=50) 
-                quantity_field = ft.TextField(value=str(quantity), width=50)
+                name_field = ft.TextField(value=name, width=510,color="black",bgcolor=ft.colors.GREEN_100)
+                price_field = ft.TextField(value=str(price), width=510,color="black",bgcolor=ft.colors.GREEN_100)
+                category_field = ft.TextField(value=category, width=510,color="black",bgcolor=ft.colors.GREEN_100)
+                quantity_field = ft.TextField(value=str(quantity), width=510,color="black",bgcolor=ft.colors.GREEN_100)
 
                 # Linha de produto
                 row = {
@@ -109,22 +121,57 @@ def abrir_janela_edicao(page):
                     'category': category_field,
                     'quantity': quantity_field,
                     'row': ft.Row(
-                        [
+                        [ 
                             ft.Text(value=product_id, width=50, text_align="center"),
-                            ft.TextField(value=name, width=200,bgcolor=ft.colors.GREEN_400),
-                            ft.TextField(value=str(price), width=100,bgcolor=ft.colors.GREEN_400),
-                            ft.TextField(value=category, width=100,bgcolor=ft.colors.GREEN_400), 
-                            ft.TextField(value=str(quantity), width=100,bgcolor=ft.colors.GREEN_400),
+                            ft.Column(
+                                [
+                                    ft.Text("Nome:", weight="bold"),
+                                    name_field
+                                ],
+                                alignment="start",
+                                spacing=2,
+                                width=100,
+                                
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Text("Preço:", weight="bold"),
+                                    price_field
+                                ],
+                                alignment="start", 
+                                spacing=2,
+                                width=80
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Text("Categoria:", weight="bold"),
+                                    category_field
+                                ],
+                                alignment="start",
+                                spacing=2,
+                                width=100
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Text("Qtd:", weight="bold"),
+                                    quantity_field
+                                ],
+                                alignment="start",
+                                spacing=2,
+                                width=60
+                            ),
                             ft.IconButton(
                                 icon=ft.icons.DELETE,
                                 tooltip="Excluir Produto",
-                                on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),
+                                on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),  # Cor de fundo do botão
+                                icon_color=ft.colors.RED,   # Cor do ícone
                             )
                         ],
                         alignment="center", 
                         spacing=10,
                     )
-                } 
+                }
+
                 product_rows.append(row)
                 product_list.controls.append(row['row'])
         page.update()
@@ -139,28 +186,23 @@ def abrir_janela_edicao(page):
         icon=ft.icons.SEARCH
     )
 
-    table_header = ft.Row(
-        [
-            ft.Text("ID", width=30),
-            ft.Text("Nome", width=100), 
-            ft.Text("Preço", width=50),
-            ft.Text("Categoria", width=150), 
-            ft.Text("Qtd", width=75),
-            ft.Text("Ação", width=100),
-        ],
-        alignment="center",
-    )
 
     save_button = ft.ElevatedButton(
         text="Salvar Alterações",
+        color="green",
+        icon_color="white",
         icon=ft.icons.SAVE,
-        on_click=save_changes
+        on_click=save_changes,
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10))
     )
 
     back_button = ft.ElevatedButton(
         text="Voltar",
         icon=ft.icons.ARROW_BACK,
-        on_click=lambda e: close_dialog()
+        color="green",
+        icon_color="white", 
+        on_click=lambda e: close_dialog(),
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10))
     )
 
     def close_dialog():
@@ -168,14 +210,12 @@ def abrir_janela_edicao(page):
         page.dialog.open = False
         page.update()
 
-
     dialog = ft.AlertDialog(
         title=ft.Text("Editar Produtos", size=20, weight="bold"),
         content=ft.Column(
             [
                 search_field,
-                table_header,
-                ft.Container(content=product_list,width=900,expand=True),  # Permitir que o container expanda
+                ft.Container(content=product_list, width=900, expand=True),  # Permitir que o container expanda
                 save_button,  
                 back_button
             ], 
@@ -189,12 +229,6 @@ def abrir_janela_edicao(page):
     page.dialog = dialog
     page.update()
 
-# Chamadas para abrir a janela de edição (substitua isso pelo seu evento real)
-# abrir_janela_edicao(page)  # Descomente para testar a função
-
-
-
-# Configuração do logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -318,14 +352,7 @@ def main(page: ft.Page):
         conn.close() 
 
 
-    # Função para buscar produtos
-    def buscar_produtos():
-        pesquisa = pesquisa_input.value  # Certifique-se de que 'pesquisa_input' é um campo de entrada definido corretamente
-        listar_produtos(pesquisa)
-        listar_historico()
-
     # Botão de busca
-    search_button = ft.ElevatedButton("Buscar", on_click=lambda e: buscar_produtos())
 
     # Função para processar a venda de um produto
     import datetime as dt  # Importar datetime, se necessário para outras partes do código
