@@ -5,6 +5,9 @@ import logging
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+
+
+
 # Função para carregar produtos do banco de dados
 def load_products():
     conn = sqlite3.connect("database_hortifruti-py.db")
@@ -113,6 +116,30 @@ def abrir_janela_edicao(page):
                 category_field = ft.TextField(value=category, width=510,color="black",bgcolor=ft.colors.GREEN_100)
                 quantity_field = ft.TextField(value=str(quantity), width=510,color="black",bgcolor=ft.colors.GREEN_100)
 
+                category = str(category) if category else ""
+                
+
+                categoria_dropdown = ft.Dropdown(
+                    label=category,
+                    width=270,
+                    bgcolor=ft.colors.GREEN_100,
+                    border_color="green",
+                    border_width=1,
+                    color="black", 
+                    
+                    label_style=ft.TextStyle(color="black"),
+                    options=[
+                        ft.dropdown.Option("Frutas"),
+                        ft.dropdown.Option("Verduras"),
+                        ft.dropdown.Option("Legumes"),
+                        ft.dropdown.Option("Grãos"),
+                        ft.dropdown.Option("Laticínios"),
+                    ],
+                    
+                )
+
+                category_field.value = category
+
                 # Linha de produto
                 row = {
                     'id': product_id,
@@ -122,10 +149,10 @@ def abrir_janela_edicao(page):
                     'quantity': quantity_field,
                     'row': ft.Row(
                         [ 
-                            ft.Text(value=product_id, width=50, text_align="center"),
+                            ft.Text(value=product_id,color="black", width=50, text_align="center"),
                             ft.Column(
                                 [
-                                    ft.Text("Nome:", weight="bold"),
+                                    ft.Text("Nome:",color="black", weight="bold"),
                                     name_field
                                 ],
                                 alignment="start",
@@ -135,7 +162,7 @@ def abrir_janela_edicao(page):
                             ),
                             ft.Column(
                                 [
-                                    ft.Text("Preço:", weight="bold"),
+                                    ft.Text("Preço:",color="black", weight="bold"),
                                     price_field
                                 ],
                                 alignment="start", 
@@ -144,8 +171,8 @@ def abrir_janela_edicao(page):
                             ),
                             ft.Column(
                                 [
-                                    ft.Text("Categoria:", weight="bold"),
-                                    category_field
+                                    ft.Text("Categoria:",color="black", weight="bold"),
+                                    categoria_dropdown
                                 ],
                                 alignment="start",
                                 spacing=2,
@@ -153,7 +180,7 @@ def abrir_janela_edicao(page):
                             ),
                             ft.Column(
                                 [
-                                    ft.Text("Qtd:", weight="bold"),
+                                    ft.Text("Qtd:",color="black", weight="bold"),
                                     quantity_field
                                 ],
                                 alignment="start",
@@ -177,8 +204,9 @@ def abrir_janela_edicao(page):
         page.update()
 
     search_field = ft.TextField(
-        label="Pesquisar produtos...",
+        label="Pesquisar produtos",
         bgcolor="#f2f2f2",
+        width=500,
         color=ft.colors.BLACK,
         border_color="green",
         label_style=ft.TextStyle(color=ft.colors.BLACK),
@@ -211,15 +239,18 @@ def abrir_janela_edicao(page):
         page.update()
 
     dialog = ft.AlertDialog(
-        title=ft.Text("Editar Produtos", size=20, weight="bold"),
+        title=ft.Text("Editar Produtos", color=ft.colors.BLACK, size=20, weight="bold"),
+        bgcolor="#f2f2f2",
         content=ft.Column(
             [
                 search_field,
-                ft.Container(content=product_list, width=900, expand=True),  # Permitir que o container expanda
-                save_button,  
-                back_button
+                ft.Container(content=product_list, width=900, expand=True),  
+                save_button,   
+                back_button,
+                
             ], 
-            spacing=10
+            spacing=10,
+            
         ),
         on_dismiss=lambda e: page.update(),
         modal=True,
@@ -454,7 +485,7 @@ def main(page: ft.Page):
                 ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
                 ft.Divider(height=5, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
+                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN,on_change=filter_products, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
                     ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
