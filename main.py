@@ -123,7 +123,7 @@ def abrir_janela_edicao(page):
                     label=category,
                     width=270,
                     bgcolor=ft.colors.GREEN_100,
-                    border_color="green",
+                    border_color="green", 
                     border_width=1,
                     color="black", 
                     
@@ -485,7 +485,7 @@ def main(page: ft.Page):
                 ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
                 ft.Divider(height=5, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN,on_change=filter_products, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
+                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
                     ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
