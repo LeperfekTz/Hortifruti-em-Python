@@ -51,4 +51,15 @@ def criar_tabelas(conexao):
         )
     ''')
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS vendas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nomeProd TEXT NOT NULL,
+            valor_total REAL NOT NULL,
+            categoria TEXT NOT NULL,
+            data_venda DATE NOT NULL,
+            quantidade INTEGER NOT NULL
+        )
+    """)
+
     conexao.commit()

@@ -134,7 +134,6 @@ def abrir_janela_edicao(page):
                         ft.dropdown.Option("Legumes"),
                         ft.dropdown.Option("Grãos"),
                         ft.dropdown.Option("Laticínios"),
-                        ft.dropdown.Option("Outros"),
                     ],
                     
                 )
@@ -149,7 +148,7 @@ def abrir_janela_edicao(page):
                     'category': category_field,
                     'quantity': quantity_field,
                     'row': ft.Row(
-                        [ 
+                        [  
                             ft.Text(value=product_id,color="black", width=50, text_align="center"),
                             ft.Column(
                                 [
@@ -158,7 +157,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=200,
+                                width=100,
                                 
                             ),
                             ft.Column(
@@ -177,7 +176,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=200
+                                width=100
                             ),
                             ft.Column(
                                 [
@@ -186,7 +185,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=100,
+                                width=60
                             ),
                             ft.IconButton(
                                 icon=ft.icons.DELETE,
@@ -331,13 +330,15 @@ def main(page: ft.Page):
             
             # Captura os valores de 'produto' e 'quantidade_input'
             venda_button = ft.ElevatedButton(
-                "Adicionar",
+                "Add",
                 on_click=lambda e,
                 p=produto,
                 q=quantidade_input: vender_produto(e, p, q),
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                 color="black",
                 bgcolor="green", 
+                icon=ft.icons.ADD,
+                icon_color="RED",
             )
             
             # Adiciona uma linha de dados para a tabela
@@ -455,7 +456,7 @@ def main(page: ft.Page):
             ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Estoque", color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Ação", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("")),
         ],
         rows=[],  # Inicialmente vazio
         border_radius=10,
@@ -466,7 +467,7 @@ def main(page: ft.Page):
             ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
             ft.DataColumn(ft.Text("quantidade", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Ação", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Data", color=ft.colors.BLACK)),
         ],
         rows=[],  # Inicialmente vazio
         border_radius=10,
@@ -600,7 +601,6 @@ def main(page: ft.Page):
                 ft.dropdown.Option("Legumes"),
                 ft.dropdown.Option("Grãos"),
                 ft.dropdown.Option("Laticínios"),
-                ft.dropdown.Option("outros"),
             ],
         )
 
@@ -751,4 +751,4 @@ def main(page: ft.Page):
 
 # Executa a aplicação
 if __name__ == "__main__":
-    ft.app(target=main)   
+    ft.app(target=main)  
