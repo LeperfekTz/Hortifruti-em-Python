@@ -186,7 +186,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=10
+                                width=100,
                             ),
                             ft.IconButton(
                                 icon=ft.icons.DELETE,
@@ -751,4 +751,4 @@ def main(page: ft.Page):
 
 # Executa a aplicação
 if __name__ == "__main__":
-    ft.app(target=main)  
+    ft.app(target=main)   
