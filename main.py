@@ -134,6 +134,7 @@ def abrir_janela_edicao(page):
                         ft.dropdown.Option("Legumes"),
                         ft.dropdown.Option("Grãos"),
                         ft.dropdown.Option("Laticínios"),
+                        ft.dropdown.Option("Outros"),
                     ],
                     
                 )
@@ -157,7 +158,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=100,
+                                width=200,
                                 
                             ),
                             ft.Column(
@@ -176,7 +177,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=100
+                                width=200
                             ),
                             ft.Column(
                                 [
@@ -185,7 +186,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=60
+                                width=10
                             ),
                             ft.IconButton(
                                 icon=ft.icons.DELETE,
@@ -599,6 +600,7 @@ def main(page: ft.Page):
                 ft.dropdown.Option("Legumes"),
                 ft.dropdown.Option("Grãos"),
                 ft.dropdown.Option("Laticínios"),
+                ft.dropdown.Option("outros"),
             ],
         )
 
