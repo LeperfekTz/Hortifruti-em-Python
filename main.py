@@ -606,27 +606,40 @@ def main(page: ft.Page):
                 ft.DataColumn(ft.Text("Data", color=ft.colors.BLACK)),
             ],
             rows=rows,
-            border_radius=10,
-            border=ft.border.all(2, ft.colors.GREEN),
-            bgcolor="#f2f2f2",
+                border_radius=10,
+                border=ft.border.all(2, ft.colors.GREEN),
+                bgcolor="#f2f2f2",
         )
 
-        # Cria um ListView para permitir rolagem automática
+        # Cria o ListView para permitir rolagem
         list_view = ft.ListView(
             controls=[
-                ft.Column(
+                ft.Row(
                     controls=[
-                        ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
-                        historico_table,
-                    ],
-                    spacing=10,
+                        ft.Text(record[0], width=50, color='black'),  # ID
+                        ft.Text(record[2], width=100, color='black'),  # Produto
+                        ft.Text(record[4], width=100, color='black'),  # Preço
+                        ft.Text(record[3], width=100, color='black'),  # Quantidade
+                        ft.Text(record[1], width=110, color='black'),  # Data
+                    ]
                 )
+                for record in records
             ],
             width=700,
-            height=400,  # Define uma altura fixa para o ListView
+            height=400,  # Define a altura do ListView
         )
 
-        return list_view
+        # Cria a coluna principal com o cabeçalho fixo e o conteúdo rolável
+        main_column = ft.Column(
+            controls=[
+                ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
+                list_view  # O ListView já tem rolagem
+            ],
+            spacing=10,
+        )
+
+        return main_column
+
 
 
     def adicionar_produto(nome, preco, quantidade, categoria):
