@@ -157,7 +157,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=100,
+                                width=220,
                                 
                             ),
                             ft.Column(
@@ -167,7 +167,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start", 
                                 spacing=2,
-                                width=80
+                                width=100
                             ),
                             ft.Column(
                                 [
@@ -176,16 +176,16 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=100
+                                width=150
                             ),
                             ft.Column(
                                 [
                                     ft.Text("Qtd:",color="black", weight="bold"),
                                     quantity_field
-                                ],
+                                ], 
                                 alignment="start",
                                 spacing=2,
-                                width=60
+                                width=60,
                             ),
                             ft.IconButton(
                                 icon=ft.icons.DELETE,
@@ -357,9 +357,9 @@ def main(page: ft.Page):
         produtos_table.rows = data_rows
         page.update()
 
-
     def listar_historico():
         conn = conectar_db()
+        
         if conn is None:
             return
 
@@ -373,22 +373,36 @@ def main(page: ft.Page):
         for sale in sales:
             historic_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(sale[1], color=ft.colors.BLACK)),  # Product 
-                    ft.DataCell(ft.Text(f"R$ {float(sale[3]):.2f}", color=ft.colors.BLACK)), 
-                    ft.DataCell(ft.Text(str(sale[2]), color=ft.colors.BLACK)),  #  Quantity # Total Price 
-                    ft.DataCell(ft.Text(sale[4], color=ft.colors.BLACK))  # Sale Date  
-                ])
+                    ft.DataCell(ft.Text(sale[1], color=ft.colors.BLACK)),  # Product
+                    ft.DataCell(ft.Text(f"R${float(sale[3]):.2f}", color=ft.colors.BLACK)),  # Total Price
+                    ft.DataCell(ft.Text(str(sale[2]), color=ft.colors.BLACK)),  # Quantity
+                    ft.DataCell(ft.Text(sale[4], color=ft.colors.BLACK)),  # Date
+                ]) 
             )
+
+        # Adiciona um DataRow para o botão de limpar histórico fora da contagem de células
+        historic_rows.append(
+            ft.DataRow(cells=[
+                ft.DataCell(ft.Text("")),
+                ft.DataCell(ft.Text("")),
+                ft.DataCell(ft.Text("")),
+                ft.DataCell(
+                    ft.ElevatedButton(
+                        "Limpar Histórico",
+                        on_click=lambda e, sale_id=sale[0]: limpar_historico(sale_id),
+                        color="black",
+                        bgcolor="red",
+                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
+                        icon=ft.icons.DELETE,
+                        icon_color=ft.colors.WHITE,
+                    )
+                )
+            ])
+        )
 
         historico_table.rows = historic_rows
         page.update()
-        conn.close() 
-
-
-    # Botão de busca
-
-    # Função para processar a venda de um produto
-    import datetime as dt  # Importar datetime, se necessário para outras partes do código
+        conn.close()
 
     def vender_produto(e, produto, quantidade_input):
         try:
@@ -472,20 +486,26 @@ def main(page: ft.Page):
         rows=[],  # Inicialmente vazio
         border_radius=10,
     )
-    def limpar_historico(e):
-        historico_table.rows.clear()  # Limpa todas as linhas da tabela 
-        conn = sqlite3.connect('database_hortifruti-py.db')  # Ajuste o caminho do banco de dados, se necessário
+    def limpar_historico(sale_id):
+        conn = conectar_db()
+        
+        if conn is None:
+            return
+
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM historico_vendas")
-        conn.commit() 
-        page.update()  # Atualiza a interface para refletir a alteração
+        cursor.execute("DELETE FROM historico_vendas WHERE id = ?", (sale_id,))
+        conn.commit()
+        conn.close()
+
+        # Atualiza a lista após a remoção
+        listar_historico()  # Recarrega o histórico para refletir as mudanças
 
     def mostrar_tela_vendas():
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
             [
                 ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                ft.Divider(height=5, thickness=1),
+                ft.Divider(height=6, thickness=1),
                 ft.Row([
                     ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
                     ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
@@ -499,7 +519,7 @@ def main(page: ft.Page):
                                 ft.Container(
                                     content=ft.ListView(
                                         controls=[produtos_table],
-                                        width=700,  # Largura ajustada para caber lado a lado
+                                        width=700,  # Largura ajustada para caber lado acomo lado
                                         height=400,
                                     ),
                                     border=ft.border.all(2, ft.colors.GREEN),
@@ -524,7 +544,7 @@ def main(page: ft.Page):
                                 ft.Container(
                                     content=ft.ListView( 
                                         controls=[historico_table],
-                                        width=500,  # Largura ajustada para caber lado a lado
+                                        width=700,  # Largura ajustada para caber lado a lado
                                         height=400,
                                     ), 
                                     border=ft.border.all(2, ft.colors.GREEN),
@@ -551,20 +571,62 @@ def main(page: ft.Page):
             )
 
 
+    def fetch_records():
+        conn = sqlite3.connect('database_hortifruti-py.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM caixa')
+        records = cursor.fetchall()
+        conn.close()
+        return records
 
-# Certifique-se de que produtos_table esteja definido corretamente antes de chamar mostrar_tela_vendas
-
-
-    # Funções para exibir diferentes telas
     def mostrar_tela_caixa():
-        return ft.Column(
-            [
-                ft.Text("Tela de Caixa", size=30, weight=ft.FontWeight.BOLD, color="black"),
-                ft.Text("Aqui você poderá gerenciar o caixa.", color="black"),
+        records = fetch_records()  # Supondo que você tenha uma função que busca os registros
+
+        # Cria as linhas do DataTable a partir dos registros
+        rows = [
+            ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(record[0], color='black', weight=ft.FontWeight.W_200)),  # ID
+                    ft.DataCell(ft.Text(record[2], color='black', weight=ft.FontWeight.W_200)),  # Produto
+                    ft.DataCell(ft.Text(record[4], color='black', weight=ft.FontWeight.W_200)),  # Preço
+                    ft.DataCell(ft.Text(record[3], color='black', weight=ft.FontWeight.W_200)),  # Quantidade
+                    ft.DataCell(ft.Text(record[1], color='black', weight=ft.FontWeight.W_200)),  # Data
+                ]
+            )
+            for record in records
+        ]
+
+        # Cria o DataTable
+        historico_table = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
+                ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
+                ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
+                ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
+                ft.DataColumn(ft.Text("Data", color=ft.colors.BLACK)),
             ],
-            alignment=ft.MainAxisAlignment.START,
-            expand=True
+            rows=rows,
+            border_radius=10,
+            border=ft.border.all(2, ft.colors.GREEN),
+            bgcolor="#f2f2f2",
         )
+
+        # Cria um ListView para permitir rolagem automática
+        list_view = ft.ListView(
+            controls=[
+                ft.Column(
+                    controls=[
+                        ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
+                        historico_table,
+                    ],
+                    spacing=10,
+                )
+            ],
+            width=700,
+            height=400,  # Define uma altura fixa para o ListView
+        )
+
+        return list_view
 
 
     def adicionar_produto(nome, preco, quantidade, categoria):
@@ -648,8 +710,7 @@ def main(page: ft.Page):
     def mostrar_tela_relatorios():
         return ft.Column(
             [
-                ft.Text("Relatórios", size=30, weight=ft.FontWeight.BOLD, color="black"),
-                ft.Text("Aqui você poderá visualizar relatórios de vendas e estoque.", color="black"),
+
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True

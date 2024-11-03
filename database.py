@@ -11,16 +11,6 @@ def criar_tabelas(conexao):
     cursor = conexao.cursor()
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS caixa (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            abertura REAL NOT NULL,
-            fechamento REAL,
-            data_abertura DATETIME DEFAULT CURRENT_TIMESTAMP,
-            data_fechamento DATETIME
-        )
-    ''')
-
-    cursor.execute('''
         CREATE TABLE IF NOT EXISTS historico_vendas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             produto TEXT NOT NULL,
@@ -61,5 +51,16 @@ def criar_tabelas(conexao):
             quantidade INTEGER NOT NULL
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS caixa (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data DATETIME DEFAULT CURRENT_TIMESTAMP,
+            nome TEXT NOT NULL,
+            quantidade INTEGER NOT NULL,
+            preco FLOAT,
+            abertura REAL,
+            fechamento REAL
+        )
+        """)
 
     conexao.commit()
