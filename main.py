@@ -610,9 +610,26 @@ def main(page: ft.Page):
                 margin=5,  # Margem entre os registros
                 border_radius=5
             )
+        
+        header = ft.Container(
+            content=ft.Row(
+                controls=[
+                    ft.Text("ID", width=50, color='black', weight=ft.FontWeight.BOLD),
+                    ft.Text("Produto", width=100, color='black', weight=ft.FontWeight.BOLD),
+                    ft.Text("Preço", width=100, color='black', weight=ft.FontWeight.BOLD),
+                    ft.Text("Quantidade", width=100, color='black', weight=ft.FontWeight.BOLD),
+                    ft.Text("Data", width=110, color='black', weight=ft.FontWeight.BOLD),
+                ],
+                spacing=10
+            ),
+            padding=10,
+            border=ft.border.all(color='green'),  # Borda ao redor do cabeçalho
+            margin=5  ,
+            border_radius=5
+        )
 
-        # Cria o ListView com as linhas
-        list_view = ft.ListView(
+        # Cria o ListView com as linhas 
+        list_view = ft.ListView( 
             controls=[create_row(record) for record in records],
             width=700,
             height=800,  # Altura do ListView
@@ -622,6 +639,7 @@ def main(page: ft.Page):
         main_column = ft.Column(
             controls=[
                 ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
+                header,
                 list_view
             ],
             spacing=10,
