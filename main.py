@@ -561,6 +561,7 @@ def main(page: ft.Page):
                                     icon_color=ft.colors.RED,
                                     )
                                     
+
                                 ],
                                 
                                 alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
@@ -580,66 +581,53 @@ def main(page: ft.Page):
         return records
 
     def mostrar_tela_caixa():
-        records = fetch_records()  # Supondo que você tenha uma função que busca os registros
+        records = fetch_records()  # Função para buscar os registros
 
-        # Cria as linhas do DataTable a partir dos registros
-        rows = [
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(record[0], color='black', weight=ft.FontWeight.W_200)),  # ID
-                    ft.DataCell(ft.Text(record[2], color='black', weight=ft.FontWeight.W_200)),  # Produto
-                    ft.DataCell(ft.Text(record[4], color='black', weight=ft.FontWeight.W_200)),  # Preço
-                    ft.DataCell(ft.Text(record[3], color='black', weight=ft.FontWeight.W_200)),  # Quantidade
-                    ft.DataCell(ft.Text(record[1], color='black', weight=ft.FontWeight.W_200)),  # Data
-                ]
-            )
-            for record in records
-        ]
+        # Verifica se há registros
+        if not records:
+            return ft.Column(controls=[ft.Text("Nenhum registro encontrado.", color=ft.colors.RED)])
 
-        # Cria o DataTable
-        historico_table = ft.DataTable(
-            columns=[
-                ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
-                ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
-                ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
-                ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
-                ft.DataColumn(ft.Text("Data", color=ft.colors.BLACK)),
-            ],
-            rows=rows,
-                border_radius=10,
-                border=ft.border.all(2, ft.colors.GREEN),
-                bgcolor="#f2f2f2",
-        )
-
-        # Cria o ListView para permitir rolagem
-        list_view = ft.ListView(
-            controls=[
-                ft.Row(
+        # Função auxiliar para criar linhas do ListView
+        def create_row(record):
+            return ft.Container(
+                content=ft.Column(
                     controls=[
-                        ft.Text(record[0], width=50, color='black'),  # ID
-                        ft.Text(record[2], width=100, color='black'),  # Produto
-                        ft.Text(record[4], width=100, color='black'),  # Preço
-                        ft.Text(record[3], width=100, color='black'),  # Quantidade
-                        ft.Text(record[1], width=110, color='black'),  # Data
-                    ]
-                )
-                for record in records
-            ],
+                        ft.Text(f"Registro ID: {record[0]}", color='black', weight=ft.FontWeight.BOLD),
+                        ft.Row(
+                            controls=[ 
+                                ft.Text(record[0],size=20, width=50, color='black', weight=ft.FontWeight.BOLD),  # ID
+                                ft.Text(record[2], width=100, color='black'),  # Produto
+                                ft.Text(record[4], width=100, color='black'),  # Preço
+                                ft.Text(record[3], width=100, color='black'),  # Quantidade
+                                ft.Text(record[1], width=110, color='black'),  # Data
+                            ]
+                        )
+                    ],
+                    spacing=5,
+                ),
+                padding=10,
+                border=ft.border.all(color='green'),  # Borda ao redor do Container
+                margin=5,  # Margem entre os registros
+                border_radius=5
+            )
+
+        # Cria o ListView com as linhas
+        list_view = ft.ListView(
+            controls=[create_row(record) for record in records],
             width=700,
-            height=400,  # Define a altura do ListView
+            height=800,  # Altura do ListView
         )
 
-        # Cria a coluna principal com o cabeçalho fixo e o conteúdo rolável
+        # Cria a coluna principal com cabeçalho e ListView
         main_column = ft.Column(
             controls=[
                 ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
-                list_view  # O ListView já tem rolagem
+                list_view
             ],
             spacing=10,
         )
 
         return main_column
-
 
 
     def adicionar_produto(nome, preco, quantidade, categoria):
