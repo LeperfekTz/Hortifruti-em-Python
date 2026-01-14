@@ -78,8 +78,9 @@ def abrir_janela_edicao(page):
         products.clear()
         products.extend(load_products())  # Recarrega os produtos
 
-        page.snack_bar = ft.SnackBar(ft.Text("Alterações salvas com sucesso!"), bgcolor="green") 
-        page.snack_bar.open = True
+        snack = ft.SnackBar(ft.Text("Alterações salvas com sucesso!"), bgcolor="green")
+        page.overlay.append(snack)
+        snack.open = True
         page.update()
 
     def delete_product_row(e, product_id):
@@ -94,8 +95,9 @@ def abrir_janela_edicao(page):
                         break
             except Exception as ex:
                 logging.error(f"Erro ao tentar deletar o produto: {ex}")
-                page.snack_bar = ft.SnackBar(ft.Text("Erro ao excluir o produto!"), bgcolor="red")
-                page.snack_bar.open = True
+                snack = ft.SnackBar(ft.Text("Erro ao excluir o produto!"), bgcolor="red")
+                page.overlay.append(snack)
+                snack.open = True
                 page.update()
             else:
                 # Atualiza a página após a remoção
@@ -112,22 +114,20 @@ def abrir_janela_edicao(page):
                 search_term in category.lower() or
                 search_term in str(price)):
                 # Campos de edição do produto
-                name_field = ft.TextField(value=name, width=510,color="black",bgcolor=ft.Colors.GREEN_100)
-                price_field = ft.TextField(value=str(price), width=510,color="black",bgcolor=ft.Colors.GREEN_100)
-                category_field = ft.TextField(value=category, width=510,color="black",bgcolor=ft.Colors.GREEN_100)
-                quantity_field = ft.TextField(value=str(quantity), width=510,color="black",bgcolor=ft.Colors.GREEN_100)
+                name_field = ft.TextField(value=name, width=200,color="black",bgcolor=ft.Colors.GREEN_100)
+                price_field = ft.TextField(value=str(price), width=100,color="black",bgcolor=ft.Colors.GREEN_100)
+                quantity_field = ft.TextField(value=str(quantity), width=80,color="black",bgcolor=ft.Colors.GREEN_100)
 
-                category = str(category) if category else ""
+                category_str = str(category) if category else "Frutas"
                 
 
                 categoria_dropdown = ft.Dropdown(
-                    label=category,
-                    width=270,
+                    value=category_str,
+                    width=150,
                     bgcolor=ft.Colors.GREEN_100,
                     border_color="green", 
                     border_width=1,
                     color="black", 
-                    
                     label_style=ft.TextStyle(color="black"),
                     options=[
                         ft.dropdown.Option("Frutas"),
@@ -139,14 +139,12 @@ def abrir_janela_edicao(page):
                     
                 )
 
-                category_field.value = category
-
                 # Linha de produto
                 row = {
                     'id': product_id,
                     'name': name_field,
                     'price': price_field,
-                    'category': category_field,
+                    'category': categoria_dropdown,
                     'quantity': quantity_field,
                     'row': ft.Row(
                         [  
@@ -158,7 +156,7 @@ def abrir_janela_edicao(page):
                                 ],
                                 alignment="start",
                                 spacing=2,
-                                width=220,
+                                width=200,
                                 
                             ),
                             ft.Column(
@@ -186,13 +184,13 @@ def abrir_janela_edicao(page):
                                 ], 
                                 alignment="start",
                                 spacing=2,
-                                width=60,
+                                width=80,
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.DELETE,
                                 tooltip="Excluir Produto",
-                                on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),  # Cor de fundo do botão
-                                icon_color=ft.Colors.RED,   # Cor do ícone
+                                on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),
+                                icon_color=ft.Colors.RED,
                             )
                         ],
                         alignment="center", 
@@ -216,22 +214,22 @@ def abrir_janela_edicao(page):
     )
 
 
-    save_button = ft.ElevatedButton(
+    save_button = ft.Button(
         text="Salvar Alterações",
         color="green",
         icon_color="white",
         icon=ft.Icons.SAVE,
         on_click=save_changes,
-        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10))
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.Padding.all(10))
     )
 
-    back_button = ft.ElevatedButton(
+    back_button = ft.Button(
         text="Voltar",
         icon=ft.Icons.ARROW_BACK,
         color="green",
         icon_color="white", 
         on_click=lambda e: close_dialog(),
-        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10))
+        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.Padding.all(10))
     )
 
     def close_dialog():
@@ -245,7 +243,7 @@ def abrir_janela_edicao(page):
         content=ft.Column(
             [
                 search_field,
-                ft.Container(content=product_list, width=900, expand=True),  
+                ft.Container(content=product_list, width=900, height=500),  
                 save_button,   
                 back_button,
                 
@@ -259,6 +257,7 @@ def abrir_janela_edicao(page):
     )
 
     page.dialog = dialog
+    filter_products(None)  # Inicializa a lista de produtos
     page.update()
 
 
@@ -330,7 +329,7 @@ def main(page: ft.Page):
             )
             
             # Captura os valores de 'produto' e 'quantidade_input'
-            venda_button = ft.ElevatedButton(
+            venda_button = ft.Button(
                 "Add",
                 on_click=lambda e,
                 p=produto,
@@ -382,24 +381,25 @@ def main(page: ft.Page):
             )
 
         # Adiciona um DataRow para o botão de limpar histórico fora da contagem de células
-        historic_rows.append(
-            ft.DataRow(cells=[
-                ft.DataCell(ft.Text("")),
-                ft.DataCell(ft.Text("")),
-                ft.DataCell(ft.Text("")),
-                ft.DataCell(
-                    ft.ElevatedButton(
-                        "Limpar Histórico",
-                        on_click=lambda e, sale_id=sale[0]: limpar_historico(sale_id),
-                        color="black",
-                        bgcolor="red",
-                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
-                        icon=ft.Icons.DELETE,
-                        icon_color=ft.Colors.WHITE,
+        if sales:  # Só adiciona o botão se houver vendas
+            historic_rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text("")),
+                    ft.DataCell(ft.Text("")),
+                    ft.DataCell(ft.Text("")),
+                    ft.DataCell(
+                        ft.Button(
+                            "Limpar Histórico",
+                            on_click=lambda e: limpar_historico(None),
+                            color="black",
+                            bgcolor="red",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.Padding.all(10)),
+                            icon=ft.Icons.DELETE,
+                            icon_color=ft.Colors.WHITE,
+                        )
                     )
-                )
-            ])
-        )
+                ])
+            )
 
         historico_table.rows = historic_rows
         page.update()
@@ -432,27 +432,28 @@ def main(page: ft.Page):
                     conn.close()
 
                     # Mensagem de sucesso
-                    page.snack_bar = ft.SnackBar(
+                    snack = ft.SnackBar(
                         ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.Colors.GREEN)
                     )
-                    page.snack_bar.open = True
+                    page.overlay.append(snack)
+                    snack.open = True
                     page.update()
 
                     # Atualiza as tabelas de produtos e histórico
                     listar_produtos() 
                     listar_historico()  # Atualiza a listagem
                 else:
-                    page.snack_bar = ft.SnackBar(
+                    snack = ft.SnackBar(
                         ft.Text("Erro ao conectar ao banco de dados.", color=ft.Colors.RED)
                     )
-                    page.snack_bar.open = True
+                    page.overlay.append(snack)
+                    snack.open = True
                     page.update()
             else:
                 show_popup(
                     "Erro",
                     "Quantidade inválida ou maior que o estoque disponível."
                 )
-                page.snack_bar.open = True
                 page.update()
         except ValueError:
             show_popup(
@@ -460,7 +461,6 @@ def main(page: ft.Page):
                 "Insira um valor numérico válido para a quantidade.",
                 color=ft.Colors.RED
             )
-            page.snack_bar.open = True
             page.update()
 
     # Cria uma tabela para listar produtos
@@ -487,14 +487,17 @@ def main(page: ft.Page):
         rows=[],  # Inicialmente vazio
         border_radius=10,
     )
-    def limpar_historico(sale_id):
+    def limpar_historico(sale_id=None):
         conn = conectar_db()
         
         if conn is None:
             return
 
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM historico_vendas WHERE id = ?", (sale_id,))
+        if sale_id is not None:
+            cursor.execute("DELETE FROM historico_vendas WHERE id = ?", (sale_id,))
+        else:
+            cursor.execute("DELETE FROM historico_vendas")
         conn.commit()
         conn.close()
 
@@ -509,7 +512,7 @@ def main(page: ft.Page):
                 ft.Divider(height=6, thickness=1),
                 ft.Row([
                     ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.Colors.BLACK),border_color=ft.Colors.GREEN, color=ft.Colors.BLACK, width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar",color="black",icon=ft.Icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
+                    ft.Button("Buscar",color="black",icon=ft.Icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
                     alignment=ft.MainAxisAlignment.START,
@@ -523,16 +526,16 @@ def main(page: ft.Page):
                                         width=700,  # Largura ajustada para caber lado acomo lado
                                         height=400,
                                     ),
-                                    border=ft.border.all(2, ft.Colors.GREEN),
+                                    border=ft.Border.all(2, ft.Colors.GREEN),
                                     border_radius=10,
                                     bgcolor="#f2f2f2", 
                                 ),
-                                ft.ElevatedButton(
+                                ft.Button(
                                     "Editar produtos",
                                     on_click=lambda _: abrir_janela_edicao(page),
                                     color="black",
                                     bgcolor="green",
-                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
+                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.Padding.all(10)),
                                     icon=ft.Icons.EDIT_NOTE,
                                     icon_color=ft.Colors.RED,
                                     ) 
@@ -548,16 +551,16 @@ def main(page: ft.Page):
                                         width=700,  # Largura ajustada para caber lado a lado
                                         height=400,
                                     ), 
-                                    border=ft.border.all(2, ft.Colors.GREEN),
+                                    border=ft.Border.all(2, ft.Colors.GREEN),
                                     border_radius=10,  
                                     bgcolor="#f2f2f2",
                                     ),
-                                ft.ElevatedButton(
+                                ft.Button(
                                     "Limpar Histórico",
                                     on_click=limpar_historico,
                                     color="black",
                                     bgcolor="green",
-                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
+                                    style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.Padding.all(10)),
                                     icon=ft.Icons.DELETE,
                                     icon_color=ft.Colors.RED,
                                     )
@@ -607,7 +610,7 @@ def main(page: ft.Page):
                     spacing=5,
                 ),
                 padding=10,
-                border=ft.border.all(color='green'),  # Borda ao redor do Container
+                border=ft.Border.all(color='green'),  # Borda ao redor do Container
                 margin=5,  # Margem entre os registros
                 border_radius=5
             )
@@ -624,7 +627,7 @@ def main(page: ft.Page):
                 spacing=10
             ),
             padding=10,
-            border=ft.border.all(color='green'),  # Borda ao redor do cabeçalho
+            border=ft.Border.all(color='green'),  # Borda ao redor do cabeçalho
             margin=5  ,
             border_radius=5
         )
@@ -687,20 +690,33 @@ def main(page: ft.Page):
         )
 
         def on_adicionar_produto(e):
-            nome = nome_produto.value
-            preco = float(preco_produto.value)  # Converte para float
-            quantidade = int(quantidade_produto.value)  # Converte para inteiro
-            categoria = categoria_dropdown.value  # Pega o valor selecionado do dropdown
-            adicionar_produto(nome, preco, quantidade, categoria)  # Passa a categoria
+            try:
+                nome = nome_produto.value
+                preco = float(preco_produto.value)  # Converte para float
+                quantidade = int(quantidade_produto.value)  # Converte para inteiro
+                categoria = categoria_dropdown.value  # Pega o valor selecionado do dropdown
+                
+                if not nome or not categoria:
+                    show_popup("Erro", "Preencha todos os campos!")
+                    return
+                    
+                adicionar_produto(nome, preco, quantidade, categoria)  # Passa a categoria
 
-            # Limpa os campos após adicionar
-            nome_produto.value = ""
-            preco_produto.value = ""
-            quantidade_produto.value = ""
-            categoria_dropdown.value = None  # Limpa a seleção do dropdown
-            
-            # Atualiza a interface
-            page.update()
+                # Mensagem de sucesso
+                snack = ft.SnackBar(ft.Text(f"Produto '{nome}' adicionado com sucesso!", color=ft.Colors.WHITE), bgcolor="green")
+                page.overlay.append(snack)
+                snack.open = True
+
+                # Limpa os campos após adicionar
+                nome_produto.value = ""
+                preco_produto.value = ""
+                quantidade_produto.value = ""
+                categoria_dropdown.value = None  # Limpa a seleção do dropdown
+                
+                # Atualiza a interface
+                page.update()
+            except ValueError:
+                show_popup("Erro", "Preço e quantidade devem ser números válidos!")
 
         return ft.Column(
             [
@@ -715,7 +731,7 @@ def main(page: ft.Page):
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
-                ft.ElevatedButton(
+                ft.Button(
                     "Adicionar Produto",
                     color=ft.Colors.BLACK, 
                     bgcolor=ft.Colors.GREEN_300,
@@ -757,12 +773,6 @@ def main(page: ft.Page):
         page.update()
 
 
-    # Função para fechar o SnackBar
-    def close_snack_bar():
-        page.snack_bar.open = False
-        page.update()
-
-
     # Função para alternar entre telas com base na seleção da NavigationRail
     def trocar_tela(e):
         if rail.selected_index == 0:
@@ -783,7 +793,7 @@ def main(page: ft.Page):
         bgcolor=ft.Colors.GREEN_100,
         indicator_color='black',
         indicator_shape=ft.RoundedRectangleBorder(radius=10),
-        leading=ft.FloatingActionButton(icon=ft.Icons.CLOSE,width=80,height=50,bgcolor=ft.Colors.RED_500,on_click=lambda e: page.window.destroy()),
+        leading=ft.FloatingActionButton(icon=ft.Icons.CLOSE,width=80,height=50,bgcolor=ft.Colors.RED_500,on_click=lambda e: page.window_close()),
         group_alignment=-0.9,
         selected_label_text_style=ft.TextStyle(color="black"),  # Estilo do label selecionado
         unselected_label_text_style=ft.TextStyle(color="black"),
