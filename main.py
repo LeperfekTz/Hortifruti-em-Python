@@ -1,6 +1,7 @@
 import flet as ft
 import sqlite3
 import logging
+import datetime as dt
 
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -111,10 +112,10 @@ def abrir_janela_edicao(page):
                 search_term in category.lower() or
                 search_term in str(price)):
                 # Campos de edição do produto
-                name_field = ft.TextField(value=name, width=510,color="black",bgcolor=ft.colors.GREEN_100)
-                price_field = ft.TextField(value=str(price), width=510,color="black",bgcolor=ft.colors.GREEN_100)
-                category_field = ft.TextField(value=category, width=510,color="black",bgcolor=ft.colors.GREEN_100)
-                quantity_field = ft.TextField(value=str(quantity), width=510,color="black",bgcolor=ft.colors.GREEN_100)
+                name_field = ft.TextField(value=name, width=510,color="black",bgcolor=ft.Colors.GREEN_100)
+                price_field = ft.TextField(value=str(price), width=510,color="black",bgcolor=ft.Colors.GREEN_100)
+                category_field = ft.TextField(value=category, width=510,color="black",bgcolor=ft.Colors.GREEN_100)
+                quantity_field = ft.TextField(value=str(quantity), width=510,color="black",bgcolor=ft.Colors.GREEN_100)
 
                 category = str(category) if category else ""
                 
@@ -122,7 +123,7 @@ def abrir_janela_edicao(page):
                 categoria_dropdown = ft.Dropdown(
                     label=category,
                     width=270,
-                    bgcolor=ft.colors.GREEN_100,
+                    bgcolor=ft.Colors.GREEN_100,
                     border_color="green", 
                     border_width=1,
                     color="black", 
@@ -188,10 +189,10 @@ def abrir_janela_edicao(page):
                                 width=60,
                             ),
                             ft.IconButton(
-                                icon=ft.icons.DELETE,
+                                icon=ft.Icons.DELETE,
                                 tooltip="Excluir Produto",
                                 on_click=lambda e, product_id=product_id: delete_product_row(e, product_id),  # Cor de fundo do botão
-                                icon_color=ft.colors.RED,   # Cor do ícone
+                                icon_color=ft.Colors.RED,   # Cor do ícone
                             )
                         ],
                         alignment="center", 
@@ -207,11 +208,11 @@ def abrir_janela_edicao(page):
         label="Pesquisar produtos",
         bgcolor="#f2f2f2",
         width=500,
-        color=ft.colors.BLACK,
+        color=ft.Colors.BLACK,
         border_color="green",
-        label_style=ft.TextStyle(color=ft.colors.BLACK),
+        label_style=ft.TextStyle(color=ft.Colors.BLACK),
         on_change=filter_products,
-        icon=ft.icons.SEARCH
+        icon=ft.Icons.SEARCH
     )
 
 
@@ -219,14 +220,14 @@ def abrir_janela_edicao(page):
         text="Salvar Alterações",
         color="green",
         icon_color="white",
-        icon=ft.icons.SAVE,
+        icon=ft.Icons.SAVE,
         on_click=save_changes,
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10))
     )
 
     back_button = ft.ElevatedButton(
         text="Voltar",
-        icon=ft.icons.ARROW_BACK,
+        icon=ft.Icons.ARROW_BACK,
         color="green",
         icon_color="white", 
         on_click=lambda e: close_dialog(),
@@ -239,7 +240,7 @@ def abrir_janela_edicao(page):
         page.update()
 
     dialog = ft.AlertDialog(
-        title=ft.Text("Editar Produtos", color=ft.colors.BLACK, size=20, weight="bold"),
+        title=ft.Text("Editar Produtos", color=ft.Colors.BLACK, size=20, weight="bold"),
         bgcolor="#f2f2f2",
         content=ft.Column(
             [
@@ -321,9 +322,9 @@ def main(page: ft.Page):
         for produto in produtos:
             quantidade_input = ft.TextField(
                 hint_text="Qtd.",
-                label_style=ft.TextStyle(color=ft.colors.BLACK), 
-                border_color=ft.colors.GREEN,
-                color=ft.colors.BLACK,
+                label_style=ft.TextStyle(color=ft.Colors.BLACK), 
+                border_color=ft.Colors.GREEN,
+                color=ft.Colors.BLACK,
                 width=80,
                 keyboard_type=ft.KeyboardType.NUMBER,
             )
@@ -337,17 +338,17 @@ def main(page: ft.Page):
                 style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                 color="black",
                 bgcolor="green", 
-                icon=ft.icons.ADD,
+                icon=ft.Icons.ADD,
                 icon_color="RED",
             )
             
             # Adiciona uma linha de dados para a tabela
             data_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(str(produto[0]), color=ft.colors.BLACK)),  # ID do produto
-                    ft.DataCell(ft.Text(produto[1], color=ft.colors.BLACK)),  # Nome do produto
-                    ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.colors.BLACK)),  # Preço do produto
-                    ft.DataCell(ft.Text(str(produto[4]), color=ft.colors.BLACK)),  # Quantidade em estoque
+                    ft.DataCell(ft.Text(str(produto[0]), color=ft.Colors.BLACK)),  # ID do produto
+                    ft.DataCell(ft.Text(produto[1], color=ft.Colors.BLACK)),  # Nome do produto
+                    ft.DataCell(ft.Text(f"R$ {float(produto[2]):.2f}", color=ft.Colors.BLACK)),  # Preço do produto
+                    ft.DataCell(ft.Text(str(produto[4]), color=ft.Colors.BLACK)),  # Quantidade em estoque
                     ft.DataCell(quantidade_input),  # Campo de entrada de quantidade
                     ft.DataCell(venda_button),  # Botão de venda
                 ])
@@ -373,10 +374,10 @@ def main(page: ft.Page):
         for sale in sales:
             historic_rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(sale[1], color=ft.colors.BLACK)),  # Product
-                    ft.DataCell(ft.Text(f"R${float(sale[3]):.2f}", color=ft.colors.BLACK)),  # Total Price
-                    ft.DataCell(ft.Text(str(sale[2]), color=ft.colors.BLACK)),  # Quantity
-                    ft.DataCell(ft.Text(sale[4], color=ft.colors.BLACK)),  # Date
+                    ft.DataCell(ft.Text(sale[1], color=ft.Colors.BLACK)),  # Product
+                    ft.DataCell(ft.Text(f"R${float(sale[3]):.2f}", color=ft.Colors.BLACK)),  # Total Price
+                    ft.DataCell(ft.Text(str(sale[2]), color=ft.Colors.BLACK)),  # Quantity
+                    ft.DataCell(ft.Text(sale[4], color=ft.Colors.BLACK)),  # Date
                 ]) 
             )
 
@@ -393,8 +394,8 @@ def main(page: ft.Page):
                         color="black",
                         bgcolor="red",
                         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
-                        icon=ft.icons.DELETE,
-                        icon_color=ft.colors.WHITE,
+                        icon=ft.Icons.DELETE,
+                        icon_color=ft.Colors.WHITE,
                     )
                 )
             ])
@@ -432,7 +433,7 @@ def main(page: ft.Page):
 
                     # Mensagem de sucesso
                     page.snack_bar = ft.SnackBar(
-                        ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.colors.GREEN)
+                        ft.Text(f"{quantidade} unidades de {produto[1]} vendidas!", color=ft.Colors.GREEN)
                     )
                     page.snack_bar.open = True
                     page.update()
@@ -442,7 +443,7 @@ def main(page: ft.Page):
                     listar_historico()  # Atualiza a listagem
                 else:
                     page.snack_bar = ft.SnackBar(
-                        ft.Text("Erro ao conectar ao banco de dados.", color=ft.colors.RED)
+                        ft.Text("Erro ao conectar ao banco de dados.", color=ft.Colors.RED)
                     )
                     page.snack_bar.open = True
                     page.update()
@@ -457,7 +458,7 @@ def main(page: ft.Page):
             show_popup(
                 "Erro", 
                 "Insira um valor numérico válido para a quantidade.",
-                color=ft.colors.RED
+                color=ft.Colors.RED
             )
             page.snack_bar.open = True
             page.update()
@@ -465,11 +466,11 @@ def main(page: ft.Page):
     # Cria uma tabela para listar produtos
     produtos_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("ID", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Estoque", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Quantidade", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("ID", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Produto", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Estoque", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Quantidade", color=ft.Colors.BLACK)),
             ft.DataColumn(ft.Text("")),
         ],
         rows=[],  # Inicialmente vazio
@@ -478,10 +479,10 @@ def main(page: ft.Page):
 
     historico_table = ft.DataTable(
         columns=[
-            ft.DataColumn(ft.Text("Produto", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Preço", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("quantidade", color=ft.colors.BLACK)),
-            ft.DataColumn(ft.Text("Data", color=ft.colors.BLACK)),
+            ft.DataColumn(ft.Text("Produto", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Preço", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("quantidade", color=ft.Colors.BLACK)),
+            ft.DataColumn(ft.Text("Data", color=ft.Colors.BLACK)),
         ],
         rows=[],  # Inicialmente vazio
         border_radius=10,
@@ -504,11 +505,11 @@ def main(page: ft.Page):
         listar_produtos()  # Preenche a tabela com produtos
         return ft.Column(
             [
-                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
+                ft.Text("Tela de Vendas", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                 ft.Divider(height=6, thickness=1),
                 ft.Row([
-                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.colors.BLACK),border_color=ft.colors.GREEN, color=ft.colors.BLACK, width=200, ref=pesquisa_input),
-                    ft.ElevatedButton("Buscar",color="black",icon=ft.icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
+                    ft.TextField(label="Pesquisar",bgcolor="#f2f2f2",label_style=ft.TextStyle(color=ft.Colors.BLACK),border_color=ft.Colors.GREEN, color=ft.Colors.BLACK, width=200, ref=pesquisa_input),
+                    ft.ElevatedButton("Buscar",color="black",icon=ft.Icons.SEARCH,bgcolor="#f2f2f2",on_click=lambda e: listar_produtos(pesquisa_input.current.value)), 
                 ]),
                 ft.Row(  # Coloca as tabelas lado a lado
                     alignment=ft.MainAxisAlignment.START,
@@ -522,7 +523,7 @@ def main(page: ft.Page):
                                         width=700,  # Largura ajustada para caber lado acomo lado
                                         height=400,
                                     ),
-                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border=ft.border.all(2, ft.Colors.GREEN),
                                     border_radius=10,
                                     bgcolor="#f2f2f2", 
                                 ),
@@ -532,8 +533,8 @@ def main(page: ft.Page):
                                     color="black",
                                     bgcolor="green",
                                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
-                                    icon=ft.icons.EDIT_NOTE,
-                                    icon_color=ft.colors.RED,
+                                    icon=ft.Icons.EDIT_NOTE,
+                                    icon_color=ft.Colors.RED,
                                     ) 
                             ],
                             alignment=ft.MainAxisAlignment.START,  # Alinhamento vertical para a coluna
@@ -547,7 +548,7 @@ def main(page: ft.Page):
                                         width=700,  # Largura ajustada para caber lado a lado
                                         height=400,
                                     ), 
-                                    border=ft.border.all(2, ft.colors.GREEN),
+                                    border=ft.border.all(2, ft.Colors.GREEN),
                                     border_radius=10,  
                                     bgcolor="#f2f2f2",
                                     ),
@@ -557,8 +558,8 @@ def main(page: ft.Page):
                                     color="black",
                                     bgcolor="green",
                                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8), padding=ft.padding.all(10)),
-                                    icon=ft.icons.DELETE,
-                                    icon_color=ft.colors.RED,
+                                    icon=ft.Icons.DELETE,
+                                    icon_color=ft.Colors.RED,
                                     )
                                     
 
@@ -585,7 +586,7 @@ def main(page: ft.Page):
 
         # Verifica se há registros
         if not records:
-            return ft.Column(controls=[ft.Text("Nenhum registro encontrado.", color=ft.colors.RED)])
+            return ft.Column(controls=[ft.Text("Nenhum registro encontrado.", color=ft.Colors.RED)])
 
         # Função auxiliar para criar linhas do ListView
         def create_row(record):
@@ -638,7 +639,7 @@ def main(page: ft.Page):
         # Cria a coluna principal com cabeçalho e ListView
         main_column = ft.Column(
             controls=[
-                ft.Text("Histórico de Vendas", color=ft.colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
+                ft.Text("Histórico de Vendas", color=ft.Colors.BLACK, size=24, weight=ft.FontWeight.BOLD),
                 header,
                 list_view
             ],
@@ -703,10 +704,10 @@ def main(page: ft.Page):
 
         return ft.Column(
             [
-                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLACK),
-                nome_produto := ft.TextField(label="Nome do Produto", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN, hint_text="Insira o nome", color=ft.colors.BLACK, width=300),
-                preco_produto := ft.TextField(label="Preço", width=300, bgcolor="#f2f2f2", keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite o valor", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN),
-                quantidade_produto := ft.TextField(label="Quantidade em Estoque", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.colors.BLACK), border_color=ft.colors.GREEN, width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.colors.BLACK, hint_text="Digite a quantidade"),
+                ft.Text("Cadastro de Produtos", size=30, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                nome_produto := ft.TextField(label="Nome do Produto", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.Colors.BLACK), border_color=ft.Colors.GREEN, hint_text="Insira o nome", color=ft.Colors.BLACK, width=300),
+                preco_produto := ft.TextField(label="Preço", width=300, bgcolor="#f2f2f2", keyboard_type=ft.KeyboardType.NUMBER, color=ft.Colors.BLACK, hint_text="Digite o valor", label_style=ft.TextStyle(color=ft.Colors.BLACK), border_color=ft.Colors.GREEN),
+                quantidade_produto := ft.TextField(label="Quantidade em Estoque", bgcolor="#f2f2f2", label_style=ft.TextStyle(color=ft.Colors.BLACK), border_color=ft.Colors.GREEN, width=300, keyboard_type=ft.KeyboardType.NUMBER, color=ft.Colors.BLACK, hint_text="Digite a quantidade"),
                 ft.Row(
                     [
                         categoria_dropdown,
@@ -716,8 +717,8 @@ def main(page: ft.Page):
                 ),
                 ft.ElevatedButton(
                     "Adicionar Produto",
-                    color=ft.colors.BLACK, 
-                    bgcolor=ft.colors.GREEN_300,
+                    color=ft.Colors.BLACK, 
+                    bgcolor=ft.Colors.GREEN_300,
                     style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                     on_click=on_adicionar_produto  # Adiciona o evento de clique
                 ), 
@@ -734,11 +735,11 @@ def main(page: ft.Page):
             alignment=ft.MainAxisAlignment.START,
             expand=True
         )
-    def show_popup(title, message, color=ft.colors.RED):
+    def show_popup(title, message, color=ft.Colors.RED):
         # Cria o conteúdo do dialog
         dialog = ft.AlertDialog(
-            title=ft.Text(title, color=ft.colors.BLACK),  # Título do popup
-            content=ft.Text(message, color=ft.colors.WHITE),  # Mensagem do popup
+            title=ft.Text(title, color=ft.Colors.BLACK),  # Título do popup
+            content=ft.Text(message, color=ft.Colors.WHITE),  # Mensagem do popup
             actions=[
                 ft.TextButton("OK", on_click=lambda e: close_popup(dialog)),  # Botão de fechar o popup
             ],
@@ -779,32 +780,28 @@ def main(page: ft.Page):
         selected_index=0,
         label_type=ft.NavigationRailLabelType.ALL, 
         min_width=100, 
-        bgcolor=ft.colors.GREEN_100,
+        bgcolor=ft.Colors.GREEN_100,
         indicator_color='black',
         indicator_shape=ft.RoundedRectangleBorder(radius=10),
-        leading=ft.FloatingActionButton(icon=ft.icons.EXIT_TO_APP,width=80,height=50,text="Sair",bgcolor=ft.colors.RED_500,on_click=lambda e: page.window.destroy()),
+        leading=ft.FloatingActionButton(icon=ft.Icons.CLOSE,width=80,height=50,bgcolor=ft.Colors.RED_500,on_click=lambda e: page.window.destroy()),
         group_alignment=-0.9,
         selected_label_text_style=ft.TextStyle(color="black"),  # Estilo do label selecionado
         unselected_label_text_style=ft.TextStyle(color="black"),
         destinations=[
             ft.NavigationRailDestination( 
-                icon_content=ft.Icon(ft.icons.ASSIGNMENT_ADD,color="black"),
-                selected_icon_content=ft.Icon(ft.icons.ASSIGNMENT_ADD,color="green"),   
+                icon=ft.Icons.ASSIGNMENT_ADD,
                 label="Cadastro",
             ),
             ft.NavigationRailDestination(
-                icon_content=ft.Icon(ft.icons.PAYMENT,color="black"),
-                selected_icon_content=ft.Icon(ft.icons.PAYMENT,color="green"),
+                icon=ft.Icons.PAYMENT,
                 label="Vendas",
             ),
             ft.NavigationRailDestination(
-                icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="black"),
-                selected_icon_content=ft.Icon(ft.icons.RECEIPT_LONG,color="green"),
+                icon=ft.Icons.RECEIPT_LONG,
                 label="Relatórios",
             ),
             ft.NavigationRailDestination(
-                icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="black"),
-                selected_icon_content=ft.Icon(ft.icons.POINT_OF_SALE,color="green"),
+                icon=ft.Icons.POINT_OF_SALE,
                 label="Caixa", 
             ),
         ],
@@ -831,4 +828,4 @@ def main(page: ft.Page):
 
 # Executa a aplicação
 if __name__ == "__main__":
-    ft.app(target=main)  
+    ft.run(main)  
